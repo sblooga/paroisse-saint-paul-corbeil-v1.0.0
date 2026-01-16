@@ -5,13 +5,13 @@
   "main": "index.js",
   "scripts": {
     "start": "npx prisma generate && node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "install": "npm install --legacy-peer-deps"
   },
   "dependencies": {
     "@prisma/client": "^6.2.1",
     "@prisma/adapter-pg": "^6.2.1",
     "bcryptjs": "^2.4.3",
-    "cloudinary": "^2.5.1",
+    "cloudinary": "^1.41.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
