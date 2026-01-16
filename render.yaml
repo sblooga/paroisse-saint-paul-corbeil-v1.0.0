@@ -3,8 +3,8 @@ services:
     name: paroisse-saint-paul-backend
     env: node
     plan: free
-    buildCommand: cd server && npm install
-    startCommand: cd server && node index.js
+    buildCommand: cd server && npm install --legacy-peer-deps
+    startCommand: cd server && npm start
     envVars:
       - key: NODE_ENV
         value: production
