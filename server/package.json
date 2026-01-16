@@ -4,8 +4,7 @@
   "description": "Backend pour la paroisse Saint-Paul",
   "main": "index.js",
   "scripts": {
-    "start": "npx prisma generate && node index.js",
-    "install": "npm install --legacy-peer-deps"
+    "start": "npx prisma generate && node index.js"
   },
   "dependencies": {
     "@prisma/client": "^6.2.1",
