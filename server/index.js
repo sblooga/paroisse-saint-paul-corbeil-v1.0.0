@@ -55,8 +55,8 @@ async function ensureAdminExists() {
 }
 
 // Démarrage du serveur
-app.listen(PORT, async () => {
+app.listen(PORT, '0.0.0.0', async () => {
   console.log(`🚀 Le Gardien surveille le port ${PORT}`);
-  // Exécution de la vérification de l'admin au lancement
   await ensureAdminExists();
 });
+
