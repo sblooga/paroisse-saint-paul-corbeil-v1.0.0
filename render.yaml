@@ -22,7 +22,8 @@ services:
   - type: web
     name: paroisse-saint-paul-frontend
     env: static
-    plan: free
+    # Le plan 'free' est automatique pour les sites statiques,
+    # on retire la ligne 'plan: free' ici pour éviter l'erreur.
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
     envVars:
