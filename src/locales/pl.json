@@ -1,0 +1,439 @@
+{
+  "common": {
+    "home": "Strona główna",
+    "parish": "Parafia",
+    "team": "Zespół",
+    "schedule": "Godziny",
+    "news": "Aktualności",
+    "contact": "Kontakt",
+    "faq": "FAQ",
+    "lifeStages": "Etapy życia",
+    "downloads": "Dokumenty Zespołów",
+    "donate": "Darowizna",
+    "search": "Szukaj",
+    "readMore": "Czytaj więcej",
+    "seeAll": "Zobacz wszystko",
+    "backToTop": "Powrót na górę",
+    "loading": "Ładowanie...",
+    "noResults": "Brak wyników",
+    "send": "Wyślij",
+    "cancel": "Anuluj",
+    "save": "Zapisz",
+    "delete": "Usuń",
+    "edit": "Edytuj",
+    "close": "Zamknij"
+  },
+  "header": {
+    "parishName": "Parafia Świętego Pawła",
+    "parishSubtitle": "Wspólnota katolicka"
+  },
+  "hero": {
+    "welcome": "Witamy",
+    "title": "Parafia Świętego Pawła",
+    "subtitle": "Żywa wspólnota w sercu miasta",
+    "cta": "Poznaj naszą parafię",
+    "massSchedule": "Godziny Mszy Świętych",
+    "contactUs": "Skontaktuj się z nami",
+    "slides": {
+      "slide1": {
+        "title": "Witamy w Parafii\nKatolickiej Świętego Pawła",
+        "subtitle": "Żywa i gościnna wspólnota"
+      },
+      "slide2": {
+        "title": "Życie Wspólnotowe",
+        "subtitle": "Dołącz do naszych zespołów i działań"
+      },
+      "slide3": {
+        "title": "Ważne Momenty Liturgiczne",
+        "subtitle": "Boże Narodzenie, Wielkanoc i święta parafialne"
+      }
+    },
+    "prevSlide": "Poprzedni slajd",
+    "nextSlide": "Następny slajd",
+    "goToSlide": "Przejdź do slajdu"
+  },
+  "about": {
+    "title": "Nasza Parafia",
+    "subtitle": "Historia wiary",
+    "description": "Od ponad stu lat nasza parafia przyjmuje wiernych i gości w duchu braterstwa i dzielenia się."
+  },
+  "team": {
+    "title": "Zespół Parafialny",
+    "subtitle": "Nasza wspólnota",
+    "description": "Zespół oddany służbie wspólnocie, aby was przyjąć i towarzyszyć wam w życiu wiary.",
+    "discoverAll": "Poznaj cały zespół",
+    "noMembers": "Brak członków zespołu.",
+    "frenchTeam": "Wspólnota francuska",
+    "polishTeam": "Wspólnota polska",
+    "contactInfo": "Aby skontaktować się z członkiem zespołu, skorzystaj z formularza kontaktowego lub WhatsApp.",
+    "whatsappSecretariat": "WhatsApp Sekretariat",
+    "question": "Masz pytanie?",
+    "contactCta": "Skontaktuj się z nami, nasz zespół jest do Twojej dyspozycji.",
+    "categories": {
+      "priests": "Księża",
+      "team": "Zespół animacyjny",
+      "services": "Służby",
+      "secretariat": "Sekretariat",
+      "choir": "Chór"
+    }
+  },
+  "articles": {
+    "title": "Aktualności",
+    "subtitle": "Wszystkie najnowsze wiadomości i wydarzenia z naszej wspólnoty parafialnej",
+    "headline": "Na pierwszej stronie",
+    "description": "Wszystkie najnowsze wiadomości z naszej wspólnoty parafialnej",
+    "seeAllNews": "Zobacz wszystkie aktualności",
+    "noArticles": "Brak opublikowanych artykułów.",
+    "noImage": "Brak zdjęcia",
+    "noContent": "Brak treści.",
+    "readMore": "Czytaj więcej",
+    "notFound": "Artykuł nie znaleziony",
+    "notFoundDesc": "Ten artykuł nie istnieje lub nie jest już dostępny.",
+    "backToArticles": "Powrót do aktualności",
+    "featured": "Wyróżnione"
+  },
+  "massSchedule": {
+    "title": "Godziny Mszy Świętych",
+    "subtitle": "Życie liturgiczne",
+    "description": "Znajdź wszystkie godziny naszych celebracji. Spowiedź możliwa przed każdą Mszą lub po umówieniu.",
+    "regularSchedules": "Regularne godziny",
+    "frenchMasses": "Msze po francusku",
+    "polishMasses": "Msze po polsku",
+    "allMasses": "Wszystkie Msze",
+    "specialEvents": "Wydarzenia specjalne",
+    "noSchedules": "Brak dostępnych godzin.",
+    "sundayMass": "Msza niedzielna",
+    "saturdayMass": "Msza wigilii",
+    "weekdayMass": "Msza codzienna",
+    "weekdays": "W tygodniu",
+    "today": "Dziś",
+    "specialEvent": "Wydarzenie specjalne",
+    "nextEvent": "Następne wydarzenie",
+    "noNextEvent": "Brak kolejnych wydarzeń",
+    "confessions": "📢 Spowiedź możliwa przed każdą Mszą lub po umówieniu.",
+    "notice": "📢 Godziny mogą ulec zmianie w święta liturgiczne",
+    "upcomingEvents": "Nadchodzące wydarzenia",
+    "viewAll": "Zobacz pełny kalendarz",
+    "cta": "Przyjdź się z nami modlić",
+    "sunday": "Niedziela",
+    "monday": "Poniedziałek",
+    "tuesday": "Wtorek",
+    "wednesday": "Środa",
+    "thursday": "Czwartek",
+    "friday": "Piątek",
+    "saturday": "Sobota"
+  },
+  "contact": {
+    "title": "Skontaktuj się z nami",
+    "subtitle": "Pozostańmy w kontakcie",
+    "description": "Masz pytanie lub prośbę? Skontaktuj się z nami. Jesteśmy do Twojej dyspozycji.",
+    "form": {
+      "name": "Imię i nazwisko",
+      "namePlaceholder": "Jan Kowalski",
+      "email": "Email",
+      "emailPlaceholder": "jan@przyklad.pl",
+      "category": "Kategoria",
+      "categoryPlaceholder": "Wybierz kategorię...",
+      "categories": {
+        "secretariat": "Sekretariat",
+        "priest": "Ksiądz",
+        "animator": "Animator",
+        "service": "Służba",
+        "choir": "Chór",
+        "baptism": "Chrzest",
+        "wedding": "Ślub",
+        "funeral": "Pogrzeb",
+        "other": "Inne"
+      },
+      "subject": "Temat",
+      "subjectPlaceholder": "Zapytanie",
+      "message": "Wiadomość",
+      "messagePlaceholder": "Twoja wiadomość...",
+      "newsletter": "Zapisz się do newslettera",
+      "newsletterDesc": "Otrzymuj aktualności parafii emailem (1-2 razy w miesiącu)",
+      "consent": "Zgadzam się na wykorzystanie moich danych zgodnie z",
+      "privacyPolicy": "polityką prywatności",
+      "send": "Wyślij wiadomość",
+      "sending": "Wysyłanie...",
+      "success": "Wiadomość wysłana!",
+      "successDesc": "Odpowiemy najszybciej jak to możliwe.",
+      "error": "Błąd",
+      "errorDesc": "Wystąpił błąd. Spróbuj ponownie.",
+      "consentRequired": "Wymagana zgoda",
+      "consentRequiredDesc": "Proszę zaakceptować politykę prywatności.",
+      "categoryRequired": "Wymagana kategoria",
+      "categoryRequiredDesc": "Proszę wybrać kategorię dla swojego zapytania.",
+      "sendMessage": "Wyślij nam wiadomość",
+      "sendMessageDesc": "Wypełnij poniższy formularz, a my odpowiemy jak najszybciej.",
+      "responseTime": "Odpowiedź w ciągu 48 godzin roboczych"
+    },
+    "info": {
+      "address": "Adres",
+      "addressValue": "Kościół Saint-Paul de Moulin-Galant\n118 bv. John Kennedy\nMoulin-Galant, CORBEIL-ESSONNES 91100",
+      "phone": "Centrala",
+      "email": "Email",
+      "hours": "Godziny",
+      "hoursValue": "Wkrótce",
+      "openMap": "Otwórz w Mapach Google"
+    }
+  },
+  "faq": {
+    "title": "Często zadawane pytania",
+    "subtitle": "FAQ",
+    "description": "Znajdź odpowiedzi na najczęściej zadawane pytania dotyczące życia naszej parafii, sakramentów i spraw administracyjnych.",
+    "moreQuestions": "Nie znalazłeś odpowiedzi?",
+    "moreQuestionsDesc": "Nasz zespół jest do Twojej dyspozycji, aby odpowiedzieć na wszystkie pytania.",
+    "contactUs": "Skontaktuj się z nami",
+    "categories": {
+      "sacraments": "Sakramenty",
+      "parishLife": "Życie parafialne",
+      "practicalInfo": "Informacje praktyczne"
+    },
+    "sacraments": {
+      "q1": "Jak przygotować się do chrztu?",
+      "a1": "Aby przygotować chrzest, skontaktuj się z sekretariatem parafii co najmniej 3 miesiące wcześniej. Przygotowanie z zespołem chrzcielnym jest obowiązkowe. Potrzebujesz aktu urodzenia i wyboru chrzestnych, którzy są ochrzczeni i bierzmowani.",
+      "q2": "Jakie są etapy ślubu kościelnego?",
+      "a2": "Skontaktuj się z parafią co najmniej rok przed planowaną datą. Przejdziesz przygotowanie do małżeństwa obejmujące kilka spotkań. Wymagane dokumenty to: akty urodzenia, świadectwa chrztu i zaświadczenie o przygotowaniu.",
+      "q3": "Jak się wyspowiadać?",
+      "a3": "Spowiedź jest możliwa 30 minut przed każdą Mszą lub po umówieniu się z księdzem. Jeśli to twoja pierwsza spowiedź, ksiądz cię poprowadzi.",
+      "q4": "Jak otrzymać sakrament chorych?",
+      "a4": "Skontaktuj się z sekretariatem lub bezpośrednio z księdzem. Sakrament ten może być udzielony w domu, w szpitalu lub podczas wspólnotowych celebracji organizowanych w ciągu roku."
+    },
+    "parishLife": {
+      "q1": "Jak zapisać dziecko na katechezę?",
+      "a1": "Zapisy odbywają się we wrześniu na rok szkolny. Katecheza jest otwarta dla dzieci w wieku szkolnym. Skontaktuj się z sekretariatem lub osobą odpowiedzialną za katechezę.",
+      "q2": "Jak dołączyć do chóru?",
+      "a2": "Chór przyjmuje wszystkich chętnych, nawet bez wykształcenia muzycznego! Próby odbywają się w czwartki o 20:30. Skontaktuj się z dyrygentem przez sekretariat.",
+      "q3": "Czy są zajęcia dla młodzieży?",
+      "a3": "Tak! Oferujemy duszpasterstwo dla gimnazjalistów i licealistów, grupy harcerskie i różne aktywności (rekolekcje, pielgrzymki, spotkania). Sprawdź naszą stronę Aktualności lub skontaktuj się z nami.",
+      "q4": "Jak zostać wolontariuszem?",
+      "a4": "Wiele służb potrzebuje wolontariuszy: przyjmowanie gości, dekorowanie kwiatami, konserwacja, katecheza, towarzyszenie chorym... Skontaktuj się z sekretariatem."
+    },
+    "practicalInfo": {
+      "q1": "Jakie są godziny Mszy Świętych?",
+      "a1": "Niedziela: 9:00, 11:00 i 18:30. Sobota: 18:00 (Msza wigilii). W tygodniu: wtorek i czwartek o 8:30, środa i piątek o 18:30. Godziny mogą się różnić w święta.",
+      "q2": "Czy kościół jest dostępny dla osób niepełnosprawnych?",
+      "a2": "Tak, kościół posiada podjazd i zarezerwowane miejsce. Dostępna jest również pętla indukcyjna dla niedosłyszących.",
+      "q3": "Jak przekazać dar na parafię?",
+      "a3": "Możesz przekazać dar podczas kolekt, przelewem lub online na naszej stronie \"Wspomóż nas\". Darowizny można odliczyć od podatku.",
+      "q4": "Jak zarezerwować salę parafialną?",
+      "a4": "Sala parafialna może być zarezerwowana na wydarzenia związane z życiem Kościoła. Skontaktuj się z sekretariatem, aby poznać dostępność i warunki."
+    }
+  },
+  "donation": {
+    "title": "Wspomóż swoją Parafię",
+    "subtitle": "Apel o wsparcie",
+    "description": "Twoja hojność pozwala naszej wspólnocie żyć, przyjmować i promieniować. Każdy dar przyczynia się do utrzymania naszego kościoła, działań parafialnych i pomocy potrzebującym.",
+    "oneTime": "Darowizna jednorazowa",
+    "monthly": "Darowizna miesięczna",
+    "securePayment": "Bezpieczna płatność przez Stripe • Dostępne potwierdzenie podatkowe",
+    "cta": "Wspomóż nas"
+  },
+  "footer": {
+    "parishName": "Parafia Świętego Pawła",
+    "description": "Żywa i gościnna wspólnota katolicka, w służbie wszystkim.",
+    "contact": "Kontakt",
+    "secretariat": "Sekretariat",
+    "hours": {
+      "weekdays": "Pon - Pt: 9:00 - 12:00 / 14:00 - 17:00",
+      "saturday": "Sobota: 9:00 - 12:00"
+    },
+    "quickLinks": "Szybkie linki",
+    "links": {
+      "massSchedule": "Godziny Mszy Świętych",
+      "baptism": "Chrzest",
+      "wedding": "Ślub",
+      "catechesis": "Katecheza",
+      "funerals": "Pogrzeby",
+      "bulletin": "Biuletyn parafialny"
+    },
+    "donate": "Wspomóż nas",
+    "rights": "Wszelkie prawa zastrzeżone",
+    "legal": "Informacje prawne",
+    "privacy": "Polityka prywatności",
+    "cookies": "Zarządzanie ciasteczkami",
+    "admin": "Administracja"
+  },
+  "auth": {
+    "adminSpace": "Panel Administratora",
+    "loginSubtitle": "Zaloguj się, aby uzyskać dostęp do panelu",
+    "signUpSubtitle": "Utwórz konto, aby uzyskać dostęp do panelu",
+    "roleInfo": "Po rejestracji administrator przyzna Ci odpowiednie uprawnienia.",
+    "password": "Hasło",
+    "passwordHint": "Minimum 6 znaków",
+    "login": "Zaloguj się",
+    "signUp": "Zarejestruj się",
+    "loginSuccess": "Logowanie udane",
+    "loginSuccessDesc": "Witamy w panelu administratora.",
+    "signUpSuccess": "Rejestracja udana",
+    "signUpSuccessDesc": "Twoje konto zostało utworzone. Administrator przyzna Ci rolę.",
+    "alreadyAccount": "Masz już konto? Zaloguj się",
+    "noAccount": "Nie masz konta? Zarejestruj się",
+    "backToSite": "Powrót do strony",
+    "backToLogin": "← Powrót do logowania",
+    "logout": "Wyloguj się",
+    "forgotPassword": "Zapomniałeś hasła",
+    "forgotSubtitle": "Podaj swój email, aby otrzymać link do resetowania hasła",
+    "forgotPasswordLink": "Zapomniałeś hasła?",
+    "sendResetLink": "Wyślij link",
+    "resetEmailSent": "Email wysłany!",
+    "resetEmailSentDesc": "Sprawdź skrzynkę odbiorczą, aby zresetować hasło.",
+    "checkInbox": "Sprawdź skrzynkę odbiorczą i kliknij link, aby zresetować hasło.",
+    "resetPassword": "Nowe hasło",
+    "resetPasswordSubtitle": "Wybierz nowe bezpieczne hasło",
+    "newPassword": "Nowe hasło",
+    "confirmPassword": "Potwierdź hasło",
+    "updatePassword": "Zaktualizuj hasło",
+    "passwordUpdated": "Hasło zaktualizowane!",
+    "passwordUpdatedDesc": "Twoje hasło zostało pomyślnie zmienione.",
+    "redirecting": "Przekierowanie...",
+    "passwordsMatch": "Hasła są zgodne",
+    "passwordsDontMatch": "Hasła nie są zgodne",
+    "passwordStrength": {
+      "label": "Siła hasła",
+      "weak": "Słabe",
+      "medium": "Średnie",
+      "strong": "Silne",
+      "veryStrong": "Bardzo silne"
+    },
+    "requirements": {
+      "minLength": "Min. 8 znaków",
+      "uppercase": "1 wielka litera",
+      "lowercase": "1 mała litera",
+      "number": "1 cyfra",
+      "special": "1 znak specjalny"
+    },
+    "errors": {
+      "invalidCredentials": "Nieprawidłowy email lub hasło.",
+      "alreadyRegistered": "Ten email jest już zarejestrowany.",
+      "weakPassword": "Hasło nie jest wystarczająco silne.",
+      "passwordsMismatch": "Hasła nie są zgodne.",
+      "invalidResetLink": "Nieprawidłowy link",
+      "invalidResetLinkDesc": "Ten link do resetowania hasła jest nieprawidłowy lub wygasł.",
+      "generic": "Wystąpił błąd. Spróbuj ponownie."
+    }
+  },
+  "admin": {
+    "title": "Panel administracyjny",
+    "actions": {
+      "refresh": "Odśwież",
+      "viewSite": "Zobacz stronę"
+    },
+    "tabs": {
+      "articles": "Artykuły",
+      "pages": "Strony",
+      "team": "Zespół",
+      "schedules": "Msze",
+      "messages": "Wiadomości",
+      "newsletter": "Newsletter",
+      "footerLinks": "Linki stopki",
+      "users": "Użytkownicy"
+    },
+    "stats": {
+      "messages": "Wiadomości",
+      "unread": "Nieprzeczytane",
+      "subscribers": "Subskrybenci",
+      "activeSubscribers": "Aktywni"
+    },
+    "accessDenied": {
+      "title": "Brak dostępu",
+      "description": "Nie masz uprawnień do tej strony. Skontaktuj się z administratorem.",
+      "backToSite": "Powrót do strony"
+    },
+    "footerLinks": {
+      "title": "Szybkie linki w stopce",
+      "add": "Dodaj link",
+      "edit": "Edytuj link",
+      "labelDefault": "Etykieta (domyślna)",
+      "labelFr": "Etykieta FR",
+      "labelPl": "Etykieta PL",
+      "url": "URL / Link",
+      "sortOrder": "Kolejność wyświetlania",
+      "active": "Aktywny",
+      "empty": "Brak skonfigurowanych linków"
+    },
+    "loading": "Ładowanie...",
+    "confirmDelete": "Czy na pewno chcesz usunąć ten element?",
+    "errors": {
+      "fetchFailed": "Błąd podczas ładowania",
+      "createFailed": "Błąd podczas tworzenia",
+      "updateFailed": "Błąd podczas aktualizacji",
+      "deleteFailed": "Błąd podczas usuwania"
+    },
+    "success": {
+      "created": "Utworzono pomyślnie",
+      "updated": "Zaktualizowano pomyślnie",
+      "deleted": "Usunięto pomyślnie"
+    },
+    "actions": {
+      "refresh": "Odśwież",
+      "viewSite": "Zobacz stronę",
+      "cancel": "Anuluj",
+      "save": "Zapisz",
+      "create": "Utwórz"
+    },
+    "changePassword": {
+      "button": "Hasło",
+      "title": "Zmień moje hasło",
+      "description": "Wprowadź nowe hasło. Musi być bezpieczne.",
+      "newPassword": "Nowe hasło",
+      "confirmPassword": "Potwierdź hasło",
+      "passwordsMismatch": "Hasła nie są zgodne",
+      "passwordsMatch": "Hasła są zgodne",
+      "success": "Hasło zmienione",
+      "successDescription": "Twoje hasło zostało pomyślnie zaktualizowane."
+    }
+  },
+  "search": {
+    "placeholder": "Szukaj...",
+    "loading": "Wyszukiwanie...",
+    "noResults": "Nie znaleziono wyników.",
+    "hint": "Wpisz, aby wyszukać...",
+    "articles": "Artykuły",
+    "pages": "Strony",
+    "team": "Zespół",
+    "schedules": "Godziny Mszy",
+    "navigation": "Nawigacja"
+  },
+  "lifeStages": {
+    "title": "Etapy życia",
+    "description": "Chcesz przyjąć sakrament lub przygotować się do ważnego wydarzenia w życiu duchowym? Znajdziesz tu wszystkie informacje, które Ci pomogą.",
+    "moreQuestions": "Potrzebujesz wsparcia?",
+    "moreQuestionsDesc": "Nasz zespół duszpasterski jest do Twojej dyspozycji, aby Ci pomóc.",
+    "contactUs": "Skontaktuj się z nami",
+    "items": {
+      "baptism": {
+        "question": "Chcę ochrzcić moje dziecko?",
+        "answer": "Chrzest jest pierwszym sakramentem inicjacji chrześcijańskiej. Aby ochrzcić dziecko, skontaktuj się z sekretariatem parafii co najmniej 3 miesiące wcześniej. Przygotowanie z zespołem chrzcielnym jest obowiązkowe. Potrzebujesz aktu urodzenia i wyboru chrzestnych, którzy są ochrzczeni i bierzmowani."
+      },
+      "communion": {
+        "question": "Chcę przygotować moje dziecko do komunii?",
+        "answer": "Pierwsza Komunia Święta jest ważnym etapem w życiu wiary dziecka. Przygotowanie odbywa się w ramach katechezy, zwykle w klasie 3 lub 4. Zapisy na katechezę odbywają się we wrześniu. Skontaktuj się z odpowiedzialną za katechezę."
+      },
+      "confirmation": {
+        "question": "Chcę przygotować moje dziecko do sakramentu bierzmowania?",
+        "answer": "Bierzmowanie jest sakramentem, który potwierdza i umacnia łaskę chrztu. Przygotowuje się je zwykle w duszpasterstwie młodzieży. Przygotowanie obejmuje katechezę, modlitwę i służbę. Skontaktuj się z duszpasterstwem."
+      },
+      "reconciliation": {
+        "question": "Chcę przygotować się do sakramentu pojednania?",
+        "answer": "Sakrament pojednania (spowiedź) jest dostępny 30 minut przed każdą Mszą lub po umówieniu się z księdzem. Jeśli to twoja pierwsza spowiedź, powiedz o tym księdzu, który cię poprowadzi. Rekolekcje wspólnotowe są organizowane w Adwencie i Wielkim Poście."
+      },
+      "marriage": {
+        "question": "Chcę wziąć ślub?",
+        "answer": "Gratulacje! Aby wziąć ślub kościelny, skontaktuj się z parafią co najmniej rok przed planowaną datą. Przejdziesz przygotowanie do małżeństwa obejmujące kilka spotkań. Wymagane dokumenty to: akty urodzenia, świadectwa chrztu i zaświadczenie o przygotowaniu."
+      },
+      "vocation": {
+        "question": "Zastanawiam się nad ewentualnym powołaniem?",
+        "answer": "Zastanawiasz się nad swoim powołaniem? To ważne pytanie, które zasługuje na towarzyszenie. Zapraszamy do spotkania z księdzem parafii. Diecezjalna Służba Powołań oferuje również rekolekcje i indywidualne towarzyszenie."
+      },
+      "anointingSick": {
+        "question": "Chciałbym otrzymać sakrament namaszczenia chorych?",
+        "answer": "Sakrament namaszczenia chorych daje siłę i pocieszenie osobom ciężko chorym lub osłabionym wiekiem. Skontaktuj się z sekretariatem lub bezpośrednio z księdzem. Może być udzielony w domu, w szpitalu lub podczas wspólnotowych celebracji."
+      },
+      "funerals": {
+        "question": "Chciałbym przygotować pogrzeb bliskiej osoby?",
+        "answer": "W tych trudnych chwilach Kościół towarzyszy wam z współczuciem. Skontaktuj się z sekretariatem parafii jak najszybciej. Zespół pogrzebowy pomoże przygotować celebrację. Oferujemy również wsparcie w żałobie."
+      }
+    }
+  }
+}

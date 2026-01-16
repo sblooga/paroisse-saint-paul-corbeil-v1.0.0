@@ -1,0 +1,439 @@
+{
+  "common": {
+    "home": "Accueil",
+    "parish": "La Paroisse",
+    "team": "Équipe",
+    "schedule": "Horaires",
+    "news": "Actualités",
+    "contact": "Contact",
+    "faq": "FAQ",
+    "lifeStages": "Étapes de vie",
+    "downloads": "Docs Équipes",
+    "donate": "Don",
+    "search": "Rechercher",
+    "readMore": "Lire la suite",
+    "seeAll": "Voir tout",
+    "backToTop": "Retour en haut",
+    "loading": "Chargement...",
+    "noResults": "Aucun résultat",
+    "send": "Envoyer",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "close": "Fermer"
+  },
+  "header": {
+    "parishName": "Paroisse Saint-Paul",
+    "parishSubtitle": "Communauté catholique"
+  },
+  "hero": {
+    "welcome": "Bienvenue",
+    "title": "Paroisse Saint-Paul",
+    "subtitle": "Une communauté vivante au cœur de la ville",
+    "cta": "Découvrir notre paroisse",
+    "massSchedule": "Horaires des messes",
+    "contactUs": "Nous contacter",
+    "slides": {
+      "slide1": {
+        "title": "Bienvenue à la paroisse\nCatholique Saint Paul",
+        "subtitle": "Une communauté vivante et accueillante"
+      },
+      "slide2": {
+        "title": "Vie Communautaire",
+        "subtitle": "Rejoignez nos équipes et activités"
+      },
+      "slide3": {
+        "title": "Temps Forts Liturgiques",
+        "subtitle": "Noël, Pâques et fêtes paroissiales"
+      }
+    },
+    "prevSlide": "Slide précédent",
+    "nextSlide": "Slide suivant",
+    "goToSlide": "Aller au slide"
+  },
+  "about": {
+    "title": "Notre Paroisse",
+    "subtitle": "Une histoire de foi",
+    "description": "Depuis plus d'un siècle, notre paroisse accueille fidèles et visiteurs dans un esprit de fraternité et de partage."
+  },
+  "team": {
+    "title": "L'Équipe Paroissiale",
+    "subtitle": "Notre communauté",
+    "description": "Une équipe dévouée au service de la communauté, pour vous accueillir et vous accompagner dans votre vie de foi.",
+    "discoverAll": "Découvrir toute l'équipe",
+    "noMembers": "Aucun membre de l'équipe pour le moment.",
+    "frenchTeam": "Communauté française",
+    "polishTeam": "Communauté polonaise",
+    "contactInfo": "Pour contacter un membre de l'équipe, utilisez notre formulaire de contact ou WhatsApp.",
+    "whatsappSecretariat": "WhatsApp Secrétariat",
+    "question": "Une question ?",
+    "contactCta": "N'hésitez pas à nous contacter, notre équipe est là pour vous accompagner.",
+    "categories": {
+      "priests": "Prêtres",
+      "team": "Équipe animatrice",
+      "services": "Services",
+      "secretariat": "Secrétariat",
+      "choir": "Chorale"
+    }
+  },
+  "articles": {
+    "title": "Actualités",
+    "subtitle": "Toutes les dernières nouvelles et événements de notre communauté paroissiale",
+    "headline": "À la Une",
+    "description": "Toutes les dernières nouvelles de notre communauté paroissiale",
+    "seeAllNews": "Voir toutes les actualités",
+    "noArticles": "Aucun article publié pour le moment.",
+    "noImage": "Pas d'image",
+    "noContent": "Aucun contenu disponible.",
+    "readMore": "Lire la suite",
+    "notFound": "Article non trouvé",
+    "notFoundDesc": "Cet article n'existe pas ou n'est plus disponible.",
+    "backToArticles": "Retour aux actualités",
+    "featured": "À la une"
+  },
+  "massSchedule": {
+    "title": "Horaires des Messes",
+    "subtitle": "Vie liturgique",
+    "description": "Retrouvez tous les horaires de nos célébrations. Les confessions sont possibles avant chaque messe ou sur rendez-vous.",
+    "regularSchedules": "Horaires réguliers",
+    "frenchMasses": "Messes en français",
+    "polishMasses": "Messes en polonais",
+    "allMasses": "Toutes les messes",
+    "specialEvents": "Événements spéciaux",
+    "noSchedules": "Aucun horaire disponible.",
+    "sundayMass": "Messe dominicale",
+    "saturdayMass": "Messe anticipée",
+    "weekdayMass": "Messe quotidienne",
+    "weekdays": "En semaine",
+    "today": "Aujourd'hui",
+    "specialEvent": "Événement spécial",
+    "nextEvent": "Prochain événement",
+    "noNextEvent": "Aucun événement à venir",
+    "confessions": "📢 Les confessions sont possibles avant chaque messe ou sur rendez-vous.",
+    "notice": "📢 Horaires susceptibles de modifications lors des fêtes liturgiques",
+    "upcomingEvents": "Prochains événements",
+    "viewAll": "Voir le calendrier complet",
+    "cta": "Venez prier avec nous",
+    "sunday": "Dimanche",
+    "monday": "Lundi",
+    "tuesday": "Mardi",
+    "wednesday": "Mercredi",
+    "thursday": "Jeudi",
+    "friday": "Vendredi",
+    "saturday": "Samedi"
+  },
+  "contact": {
+    "title": "Contactez-nous",
+    "subtitle": "Restons en contact",
+    "description": "Une question, une demande ? N'hésitez pas à nous contacter. Nous sommes à votre écoute.",
+    "form": {
+      "name": "Nom complet",
+      "namePlaceholder": "Jean Dupont",
+      "email": "Email",
+      "emailPlaceholder": "jean@exemple.fr",
+      "category": "Catégorie",
+      "categoryPlaceholder": "Choisir une catégorie...",
+      "categories": {
+        "secretariat": "Secrétariat",
+        "priest": "Prêtre",
+        "animator": "Animateur",
+        "service": "Service",
+        "choir": "Chorale",
+        "baptism": "Baptême",
+        "wedding": "Mariage",
+        "funeral": "Obsèques",
+        "other": "Autre"
+      },
+      "subject": "Sujet",
+      "subjectPlaceholder": "Demande de renseignements",
+      "message": "Message",
+      "messagePlaceholder": "Votre message...",
+      "newsletter": "S'inscrire à la newsletter",
+      "newsletterDesc": "Recevez les actualités de la paroisse par email (1-2 fois par mois)",
+      "consent": "J'accepte que mes données soient utilisées pour traiter ma demande conformément à la",
+      "privacyPolicy": "politique de confidentialité",
+      "send": "Envoyer le message",
+      "sending": "Envoi en cours...",
+      "success": "Message envoyé !",
+      "successDesc": "Nous vous répondrons dans les plus brefs délais.",
+      "error": "Erreur",
+      "errorDesc": "Une erreur est survenue. Veuillez réessayer.",
+      "consentRequired": "Consentement requis",
+      "consentRequiredDesc": "Veuillez accepter la politique de confidentialité.",
+      "categoryRequired": "Catégorie requise",
+      "categoryRequiredDesc": "Veuillez sélectionner une catégorie pour votre demande.",
+      "sendMessage": "Envoyez-nous un message",
+      "sendMessageDesc": "Remplissez le formulaire ci-dessous et nous vous répondrons rapidement.",
+      "responseTime": "Réponse sous 48h ouvrées"
+    },
+    "info": {
+      "address": "Adresse",
+      "addressValue": "Église Saint-Paul de Moulin-Galant\n118 bv. John Kennedy\nMoulin-Galant, CORBEIL-ESSONNES 91100",
+      "phone": "Standard",
+      "email": "Email",
+      "hours": "Horaires",
+      "hoursValue": "À venir",
+      "openMap": "Ouvrir dans Google Maps"
+    }
+  },
+  "faq": {
+    "title": "Foire Aux Questions",
+    "subtitle": "FAQ",
+    "description": "Retrouvez les réponses aux questions les plus fréquentes sur la vie de notre paroisse, les sacrements et les démarches administratives.",
+    "moreQuestions": "Vous n'avez pas trouvé votre réponse ?",
+    "moreQuestionsDesc": "Notre équipe est à votre disposition pour répondre à toutes vos questions.",
+    "contactUs": "Nous contacter",
+    "categories": {
+      "sacraments": "Sacrements",
+      "parishLife": "Vie paroissiale",
+      "practicalInfo": "Informations pratiques"
+    },
+    "sacraments": {
+      "q1": "Comment préparer un baptême ?",
+      "a1": "Pour préparer un baptême, contactez le secrétariat paroissial au moins 3 mois à l'avance. Une préparation avec l'équipe baptême est obligatoire. Vous aurez besoin d'un extrait d'acte de naissance et de choisir un parrain et/ou une marraine baptisé(e) et confirmé(e).",
+      "q2": "Quelles sont les étapes pour se marier à l'église ?",
+      "a2": "Prenez contact avec la paroisse au moins un an avant la date souhaitée. Vous suivrez une préparation au mariage comprenant plusieurs rencontres. Les documents nécessaires incluent : extraits d'acte de naissance, certificats de baptême, et attestation de préparation.",
+      "q3": "Comment se confesser ?",
+      "a3": "Les confessions sont possibles 30 minutes avant chaque messe ou sur rendez-vous auprès d'un prêtre. N'hésitez pas à demander si c'est votre première confession, le prêtre vous guidera.",
+      "q4": "Comment recevoir le sacrement des malades ?",
+      "a4": "Contactez le secrétariat ou directement un prêtre. Ce sacrement peut être donné à domicile, à l'hôpital ou lors de célébrations communautaires organisées dans l'année."
+    },
+    "parishLife": {
+      "q1": "Comment inscrire mon enfant au catéchisme ?",
+      "a1": "Les inscriptions se font en septembre pour l'année scolaire. Le catéchisme est ouvert aux enfants du CE1 au CM2. Contactez le secrétariat ou la responsable de la catéchèse pour plus d'informations.",
+      "q2": "Comment rejoindre la chorale ?",
+      "a2": "La chorale accueille tous les volontaires, même sans formation musicale ! Les répétitions ont lieu le jeudi soir à 20h30. Contactez le chef de chorale via le secrétariat.",
+      "q3": "Y a-t-il des activités pour les jeunes ?",
+      "a3": "Oui ! Nous proposons l'aumônerie pour les collégiens et lycéens, des groupes scouts, et diverses activités (retraites, pèlerinages, soirées). Consultez notre page Actualités ou contactez-nous.",
+      "q4": "Comment devenir bénévole ?",
+      "a4": "De nombreux services ont besoin de bénévoles : accueil, fleurissement, entretien, catéchèse, accompagnement des malades... Contactez le secrétariat pour découvrir où vos talents peuvent servir."
+    },
+    "practicalInfo": {
+      "q1": "Quels sont les horaires des messes ?",
+      "a1": "Dimanche : 9h00, 11h00 et 18h30. Samedi : 18h00 (messe anticipée). En semaine : mardi et jeudi à 8h30, mercredi et vendredi à 18h30. Les horaires peuvent varier pendant les fêtes.",
+      "q2": "L'église est-elle accessible aux personnes à mobilité réduite ?",
+      "a2": "Oui, l'église dispose d'une rampe d'accès et d'un emplacement réservé. Une boucle magnétique est également disponible pour les malentendants.",
+      "q3": "Comment faire un don à la paroisse ?",
+      "a3": "Vous pouvez donner lors des quêtes, par chèque, par virement ou en ligne sur notre page \"Faire un don\". Les dons sont déductibles des impôts à hauteur de 66%. Un reçu fiscal vous sera envoyé.",
+      "q4": "Comment réserver la salle paroissiale ?",
+      "a4": "La salle paroissiale peut être réservée pour des événements en lien avec la vie de l'Église. Contactez le secrétariat pour connaître les disponibilités et les conditions."
+    }
+  },
+  "donation": {
+    "title": "Soutenez votre Paroisse",
+    "subtitle": "Appel aux dons",
+    "description": "Votre générosité permet à notre communauté de vivre, d'accueillir et de rayonner. Chaque don contribue à l'entretien de notre église, aux activités paroissiales et à l'aide aux plus démunis.",
+    "oneTime": "Don ponctuel",
+    "monthly": "Don mensuel",
+    "securePayment": "Paiement sécurisé par Stripe • Reçu fiscal disponible",
+    "cta": "Faire un don"
+  },
+  "footer": {
+    "parishName": "Paroisse Saint-Paul",
+    "description": "Une communauté catholique vivante et accueillante, au service de tous.",
+    "contact": "Contact",
+    "secretariat": "Secrétariat",
+    "hours": {
+      "weekdays": "Lun - Ven : 9h - 12h / 14h - 17h",
+      "saturday": "Samedi : 9h - 12h"
+    },
+    "quickLinks": "Liens Rapides",
+    "links": {
+      "massSchedule": "Horaires des messes",
+      "baptism": "Baptême",
+      "wedding": "Mariage",
+      "catechesis": "Catéchèse",
+      "funerals": "Obsèques",
+      "bulletin": "Bulletin paroissial"
+    },
+    "donate": "Faire un don",
+    "rights": "Tous droits réservés",
+    "legal": "Mentions légales",
+    "privacy": "Politique de confidentialité",
+    "cookies": "Gestion des cookies",
+    "admin": "Administration"
+  },
+  "auth": {
+    "adminSpace": "Espace Administrateur",
+    "loginSubtitle": "Connectez-vous pour accéder au tableau de bord",
+    "signUpSubtitle": "Créez votre compte pour accéder au tableau de bord",
+    "roleInfo": "Après votre inscription, un administrateur vous attribuera les droits d'accès nécessaires.",
+    "password": "Mot de passe",
+    "passwordHint": "Minimum 6 caractères",
+    "login": "Se connecter",
+    "signUp": "S'inscrire",
+    "loginSuccess": "Connexion réussie",
+    "loginSuccessDesc": "Bienvenue dans l'espace administrateur.",
+    "signUpSuccess": "Inscription réussie",
+    "signUpSuccessDesc": "Votre compte a été créé. Un administrateur vous attribuera un rôle.",
+    "alreadyAccount": "Déjà un compte ? Se connecter",
+    "noAccount": "Pas de compte ? S'inscrire",
+    "backToSite": "Retour au site",
+    "backToLogin": "← Retour à la connexion",
+    "logout": "Déconnexion",
+    "forgotPassword": "Mot de passe oublié",
+    "forgotSubtitle": "Entrez votre email pour recevoir un lien de réinitialisation",
+    "forgotPasswordLink": "Mot de passe oublié ?",
+    "sendResetLink": "Envoyer le lien",
+    "resetEmailSent": "Email envoyé !",
+    "resetEmailSentDesc": "Vérifiez votre boîte de réception pour réinitialiser votre mot de passe.",
+    "checkInbox": "Vérifiez votre boîte de réception et cliquez sur le lien pour réinitialiser votre mot de passe.",
+    "resetPassword": "Nouveau mot de passe",
+    "resetPasswordSubtitle": "Choisissez un nouveau mot de passe sécurisé",
+    "newPassword": "Nouveau mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "updatePassword": "Mettre à jour le mot de passe",
+    "passwordUpdated": "Mot de passe mis à jour !",
+    "passwordUpdatedDesc": "Votre mot de passe a été modifié avec succès.",
+    "redirecting": "Redirection en cours...",
+    "passwordsMatch": "Les mots de passe correspondent",
+    "passwordsDontMatch": "Les mots de passe ne correspondent pas",
+    "passwordStrength": {
+      "label": "Force du mot de passe",
+      "weak": "Faible",
+      "medium": "Moyen",
+      "strong": "Fort",
+      "veryStrong": "Très fort"
+    },
+    "requirements": {
+      "minLength": "8 caractères min.",
+      "uppercase": "1 majuscule",
+      "lowercase": "1 minuscule",
+      "number": "1 chiffre",
+      "special": "1 caractère spécial"
+    },
+    "errors": {
+      "invalidCredentials": "Email ou mot de passe incorrect.",
+      "alreadyRegistered": "Cet email est déjà enregistré.",
+      "weakPassword": "Le mot de passe n'est pas assez fort.",
+      "passwordsMismatch": "Les mots de passe ne correspondent pas.",
+      "invalidResetLink": "Lien invalide",
+      "invalidResetLinkDesc": "Ce lien de réinitialisation est invalide ou a expiré.",
+      "generic": "Une erreur est survenue. Veuillez réessayer."
+    }
+  },
+  "admin": {
+    "title": "Tableau de bord",
+    "actions": {
+      "refresh": "Actualiser",
+      "viewSite": "Voir le site"
+    },
+    "tabs": {
+      "articles": "Articles",
+      "pages": "Pages",
+      "team": "Équipe",
+      "schedules": "Messes",
+      "messages": "Messages",
+      "newsletter": "Newsletter",
+      "footerLinks": "Liens footer",
+      "users": "Utilisateurs"
+    },
+    "stats": {
+      "messages": "Messages",
+      "unread": "Non lus",
+      "subscribers": "Abonnés newsletter",
+      "activeSubscribers": "Actifs"
+    },
+    "accessDenied": {
+      "title": "Accès restreint",
+      "description": "Vous n'avez pas les droits nécessaires pour accéder à cette page. Contactez un administrateur pour obtenir l'accès.",
+      "backToSite": "Retour au site"
+    },
+    "footerLinks": {
+      "title": "Liens rapides du footer",
+      "add": "Ajouter un lien",
+      "edit": "Modifier le lien",
+      "labelDefault": "Libellé (défaut)",
+      "labelFr": "Libellé FR",
+      "labelPl": "Libellé PL",
+      "url": "URL / Lien",
+      "sortOrder": "Ordre d'affichage",
+      "active": "Actif",
+      "empty": "Aucun lien configuré"
+    },
+    "loading": "Chargement...",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer cet élément ?",
+    "errors": {
+      "fetchFailed": "Erreur lors du chargement",
+      "createFailed": "Erreur lors de la création",
+      "updateFailed": "Erreur lors de la mise à jour",
+      "deleteFailed": "Erreur lors de la suppression"
+    },
+    "success": {
+      "created": "Créé avec succès",
+      "updated": "Mis à jour avec succès",
+      "deleted": "Supprimé avec succès"
+    },
+    "actions": {
+      "refresh": "Actualiser",
+      "viewSite": "Voir le site",
+      "cancel": "Annuler",
+      "save": "Enregistrer",
+      "create": "Créer"
+    },
+    "changePassword": {
+      "button": "Mot de passe",
+      "title": "Changer mon mot de passe",
+      "description": "Entrez votre nouveau mot de passe. Celui-ci doit être sécurisé.",
+      "newPassword": "Nouveau mot de passe",
+      "confirmPassword": "Confirmer le mot de passe",
+      "passwordsMismatch": "Les mots de passe ne correspondent pas",
+      "passwordsMatch": "Les mots de passe correspondent",
+      "success": "Mot de passe modifié",
+      "successDescription": "Votre mot de passe a été mis à jour avec succès."
+    }
+  },
+  "search": {
+    "placeholder": "Rechercher...",
+    "loading": "Recherche en cours...",
+    "noResults": "Aucun résultat trouvé.",
+    "hint": "Tapez pour rechercher...",
+    "articles": "Articles",
+    "pages": "Pages",
+    "team": "Équipe",
+    "schedules": "Horaires des messes",
+    "navigation": "Navigation"
+  },
+  "lifeStages": {
+    "title": "Étapes de vie",
+    "description": "Vous souhaitez recevoir un sacrement ou préparer un événement important de votre vie spirituelle ? Retrouvez ici toutes les informations pour vous accompagner.",
+    "moreQuestions": "Besoin d'accompagnement ?",
+    "moreQuestionsDesc": "Notre équipe pastorale est à votre disposition pour vous guider dans vos démarches.",
+    "contactUs": "Nous contacter",
+    "items": {
+      "baptism": {
+        "question": "Je veux baptiser mon enfant ?",
+        "answer": "Le baptême est le premier sacrement de l'initiation chrétienne. Pour baptiser votre enfant, contactez le secrétariat paroissial au moins 3 mois à l'avance. Une préparation avec l'équipe baptême est obligatoire. Vous aurez besoin d'un extrait d'acte de naissance et de choisir un parrain et/ou une marraine baptisé(e) et confirmé(e). Des réunions de préparation sont organisées régulièrement."
+      },
+      "communion": {
+        "question": "Je veux préparer mon enfant à la communion ?",
+        "answer": "La première communion est une étape importante dans la vie de foi de votre enfant. La préparation se fait dans le cadre du catéchisme, généralement en classe de CE2 ou CM1. Les inscriptions au catéchisme se font en septembre. Contactez la responsable de la catéchèse pour plus d'informations sur le parcours et les dates de célébration."
+      },
+      "confirmation": {
+        "question": "Je veux préparer mon enfant au sacrement de la Confirmation ?",
+        "answer": "La Confirmation est le sacrement qui confirme et renforce la grâce du baptême. Elle se prépare généralement à l'aumônerie pour les collégiens et lycéens. La préparation comprend des temps de catéchèse, de prière et de service. Contactez l'aumônerie pour connaître les conditions et les dates de célébration."
+      },
+      "reconciliation": {
+        "question": "Je veux me préparer au sacrement de la Réconciliation ?",
+        "answer": "Le sacrement de la Réconciliation (confession) est disponible 30 minutes avant chaque messe ou sur rendez-vous auprès d'un prêtre. Si c'est votre première confession, n'hésitez pas à le signaler au prêtre qui vous guidera avec bienveillance. Des temps de réconciliation communautaires sont également proposés pendant l'Avent et le Carême."
+      },
+      "marriage": {
+        "question": "Je veux me marier ?",
+        "answer": "Félicitations ! Pour un mariage à l'église, prenez contact avec la paroisse au moins un an avant la date souhaitée. Vous suivrez une préparation au mariage comprenant plusieurs rencontres avec d'autres couples et avec un prêtre ou diacre. Les documents nécessaires incluent : extraits d'acte de naissance, certificats de baptême et attestation de préparation."
+      },
+      "vocation": {
+        "question": "Je me pose la question sur une éventuelle vocation ?",
+        "answer": "Vous vous interrogez sur votre vocation ? C'est une question importante qui mérite d'être accompagnée. Nous vous invitons à rencontrer un prêtre de la paroisse pour en parler librement. Le Service diocésain des vocations propose également des temps de discernement, des retraites et un accompagnement personnel. N'hésitez pas à nous contacter."
+      },
+      "anointingSick": {
+        "question": "Je voudrais bénéficier du sacrement de l'onction des malades ?",
+        "answer": "Le sacrement de l'onction des malades apporte force et réconfort aux personnes gravement malades ou fragilisées par l'âge. Contactez le secrétariat ou directement un prêtre pour demander ce sacrement. Il peut être donné à domicile, à l'hôpital ou lors de célébrations communautaires organisées dans l'année. Ne tardez pas à le demander."
+      },
+      "funerals": {
+        "question": "Je voudrais me préparer pour les obsèques d'un proche ?",
+        "answer": "Dans ces moments difficiles, l'Église vous accompagne avec compassion. Contactez le secrétariat paroissial dès que possible pour organiser les obsèques. L'équipe funérailles vous aidera à préparer la célébration et à choisir les lectures et les chants. Nous proposons également un accompagnement pour le deuil avec des groupes de parole."
+      }
+    }
+  }
+}

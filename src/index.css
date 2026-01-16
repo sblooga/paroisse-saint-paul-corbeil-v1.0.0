@@ -1,0 +1,241 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Smooth theme transition */
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+@layer base {
+  :root {
+    /* Parish Brand Colors */
+    --royal-blue: 223 82% 34%;
+    --emerald: 151 100% 38%;
+    --amber: 37 90% 55%;
+    --cream: 45 50% 97%;
+    --brown-dark: 24 31% 12%;
+    --dusty-rose: 350 35% 55%;
+    --soft-blue: 210 60% 50%;
+    
+    /* Semantic Colors */
+    --background: 45 40% 94%;
+    --foreground: 24 31% 12%;
+
+    --card: 45 35% 98%;
+    --card-foreground: 24 31% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 24 31% 12%;
+
+    --primary: 223 82% 34%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 151 100% 38%;
+    --secondary-foreground: 0 0% 100%;
+
+    --accent: 37 90% 55%;
+    --accent-foreground: 24 31% 12%;
+
+    --muted: 45 25% 88%;
+    --muted-foreground: 24 25% 35%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 24 20% 78%;
+    --input: 24 20% 78%;
+    --ring: 223 82% 34%;
+
+    --radius: 0.75rem;
+
+    /* Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(223 82% 25%) 100%);
+    --gradient-gold: linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(37 90% 45%) 100%);
+    --gradient-overlay: linear-gradient(180deg, rgba(16, 52, 166, 0.7) 0%, rgba(16, 52, 166, 0.4) 100%);
+
+    /* Shadows */
+    --shadow-soft: 0 4px 20px -4px hsl(var(--primary) / 0.15);
+    --shadow-card: 0 10px 40px -10px hsl(var(--brown-dark) / 0.1);
+    --shadow-glow: 0 0 30px hsl(var(--accent) / 0.3);
+
+    /* Typography */
+    --font-heading: 'Playfair Display', serif;
+    --font-body: 'Lato', sans-serif;
+
+    /* Sidebar (keeping defaults) */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 223 40% 8%;
+    --foreground: 45 30% 95%;
+
+    --card: 223 40% 12%;
+    --card-foreground: 45 30% 95%;
+
+    --popover: 223 40% 12%;
+    --popover-foreground: 45 30% 95%;
+
+    --primary: 223 70% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 151 80% 45%;
+    --secondary-foreground: 0 0% 100%;
+
+    --accent: 37 90% 55%;
+    --accent-foreground: 24 31% 12%;
+
+    --muted: 223 30% 18%;
+    --muted-foreground: 45 20% 65%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 223 30% 22%;
+    --input: 223 30% 22%;
+    --ring: 223 70% 55%;
+    
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-semibold tracking-tight;
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl;
+  }
+
+  h4 {
+    @apply text-xl md:text-2xl;
+  }
+}
+
+@layer components {
+  .btn-parish {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-300;
+    @apply bg-primary text-primary-foreground hover:opacity-90;
+    box-shadow: var(--shadow-soft);
+    @apply hover:shadow-lg hover:-translate-y-0.5;
+  }
+
+  .btn-parish-outline {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-300;
+    @apply border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground;
+  }
+
+  .btn-accent {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-300;
+    background: var(--gradient-gold);
+    @apply text-accent-foreground hover:opacity-90;
+    box-shadow: var(--shadow-glow);
+  }
+
+  .card-parish {
+    @apply bg-card rounded-xl overflow-hidden shadow-card;
+    @apply border border-border/50 ring-1 ring-border/20;
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10;
+  }
+
+  .section-padding {
+    @apply py-16 md:py-24 px-4 md:px-8;
+  }
+
+  .container-parish {
+    @apply max-w-7xl mx-auto;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-hero);
+  }
+
+  .overlay-gradient {
+    background: var(--gradient-overlay);
+  }
+}
+
+@layer utilities {
+  .animate-fade-up {
+    animation: fadeUp 0.6s ease-out forwards;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.5s ease-out forwards;
+  }
+
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .delay-100 { animation-delay: 100ms; }
+  .delay-200 { animation-delay: 200ms; }
+  .delay-300 { animation-delay: 300ms; }
+  .delay-400 { animation-delay: 400ms; }
+}
