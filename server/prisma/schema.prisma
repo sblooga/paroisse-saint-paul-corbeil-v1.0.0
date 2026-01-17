@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  passwordHash  String
+  role          Role     @default(EDITOR)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+}
+
+model Article {
+  id         String   @id @default(uuid())
+  title_fr   String
+  title_pl   String?
+  slug       String   @unique
+  content_fr String?
+  content_pl String?
+  excerpt_fr String?
+  excerpt_pl String?
+  imageUrl   String?
+  category   String?
+  published  Boolean  @default(false)
+  featured   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model TeamMember {
+  id        String   @id @default(uuid())
+  name      String
+  role_fr   String
+  role_pl   String?
+  photoUrl  String?
+  email     String?
+  whatsapp  String?
+  category  String
+  order     Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MassSchedule {
+  id          String   @id @default(uuid())
+  day_fr      String
+  day_pl      String?
+  time        String
+  location    String?
+  description String?
+  order       Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ContactMessage {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  subject   String?
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model SiteSettings {
+  id        String   @id @default("main")
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
