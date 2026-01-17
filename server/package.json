@@ -5,7 +5,7 @@
   "scripts": {
     "start": "npx prisma generate && node index.js"
   },
-  "dependencies": {
+    "dependencies": {
     "@prisma/client": "^6.2.1",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^1.41.0",
