@@ -1,6 +1,4 @@
 const { PrismaClient } = require('@prisma/client');
-const { PrismaNeon } = require('@prisma/adapter-neon');
-const { neonConfig, Pool } = require('@neondatabase/serverless');
 
 const connectionString = (process.env.DATABASE_URL || '').trim();
 
@@ -14,12 +12,7 @@ if (connectionString.includes(' ')) {
   console.warn('[db] Attention: DATABASE_URL contient des espaces');
 }
 
-// Active le cache de connexion HTTP pour limiter le nombre de connexions côté Neon
-neonConfig.fetchConnectionCache = true;
-
-const pool = new Pool({ connectionString });
-const adapter = new PrismaNeon(pool);
-
-const prisma = new PrismaClient({ adapter });
+// Utilisation du client Prisma standard (driver PostgreSQL natif)
+const prisma = new PrismaClient();
 
 module.exports = prisma;
