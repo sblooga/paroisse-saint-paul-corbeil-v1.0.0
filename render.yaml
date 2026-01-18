@@ -3,11 +3,13 @@ services:
     name: paroisse-saint-paul-backend
     env: node
     plan: free
-    buildCommand: cd server && npm install --legacy-peer-deps && npx prisma generate
+    buildCommand: cd server && npm install --legacy-peer-deps --include=dev && npx prisma generate
     startCommand: cd server && node index.js
     envVars:
       - key: NODE_ENV
         value: production
+      - key: NPM_CONFIG_PRODUCTION
+        value: "false"
       - key: DATABASE_URL
         sync: false
       - key: ADMIN_EMAIL
