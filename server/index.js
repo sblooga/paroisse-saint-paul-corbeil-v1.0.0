@@ -34,12 +34,14 @@ const articleRoutes = require('./routes/articles');
 const teamRoutes = require('./routes/team');
 const scheduleRoutes = require('./routes/schedules');
 const authRoutes = require('./routes/auth');
+const uploadRoutes = require('./routes/uploads');
 
 // Utilisation des routes
 app.use('/api/auth', authRoutes);
 app.use('/api/articles', articleRoutes);
 app.use('/api/team', teamRoutes);
 app.use('/api/schedules', scheduleRoutes);
+app.use('/api/uploads', uploadRoutes);
 
 // Route de test pour vérifier que le serveur répond
 app.get('/api/health', (req, res) => {
