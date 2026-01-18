@@ -6,8 +6,6 @@
     "start": "node index.js"
   },
     "dependencies": {
-    "@neondatabase/serverless": "^0.10.3",
-    "@prisma/adapter-neon": "^6.2.1",
     "@prisma/client": "^6.2.1",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^1.41.0",

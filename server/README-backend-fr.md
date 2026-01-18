@@ -44,3 +44,18 @@ Upload images Cloudinary (`/api/uploads`)
 Notes
 - Les routes admin renvoient 401 si token manquant/invalid, 403 si rôle insuffisant, 404 si ressource absente, 400 si champs obligatoires manquants.
 - `CORS_ORIGINS` doit inclure l'URL du front pour autoriser les appels navigateur.
+
+## Tests rapides (curl Windows)
+- Login :
+  ```powershell
+  $body = '{"email":"<ADMIN_EMAIL>","password":"<ADMIN_PASSWORD>"}'
+  curl.exe -X POST "https://paroisse-saint-paul-backend.onrender.com/api/auth/login" `
+    -H "Content-Type: application/json" `
+    -d $body
+  ```
+- Requête admin avec token :
+  ```powershell
+  $token = "<token_reçu>"
+  curl.exe "https://paroisse-saint-paul-backend.onrender.com/api/articles/all" `
+    -H "Authorization: Bearer $token"
+  ```
