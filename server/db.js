@@ -1,10 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
-// On s'assure que l'URL est bien passée au client
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL,
-    },
-  },
-});
+
+// Plus besoin de config externe, Prisma 6/7 lira DATABASE_URL
+// directement depuis les variables d'environnement de Render.
+const prisma = new PrismaClient();
+
 module.exports = prisma;
