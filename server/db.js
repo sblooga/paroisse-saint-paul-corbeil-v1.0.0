@@ -1,7 +1,19 @@
 const { PrismaClient } = require('@prisma/client');
+const { PrismaNeon } = require('@prisma/adapter-neon');
+const { neonConfig, Pool } = require('@neondatabase/serverless');
 
-// Plus besoin de config externe, Prisma 6/7 lira DATABASE_URL
-// directement depuis les variables d'environnement de Render.
-const prisma = new PrismaClient();
+const connectionString = process.env.DATABASE_URL;
+
+if (!connectionString) {
+  throw new Error('DATABASE_URL manquant dans les variables d\'environnement');
+}
+
+// Active le cache de connexion HTTP pour limiter le nombre de connexions côté Neon
+neonConfig.fetchConnectionCache = true;
+
+const pool = new Pool({ connectionString });
+const adapter = new PrismaNeon(pool);
+
+const prisma = new PrismaClient({ adapter });
 
 module.exports = prisma;

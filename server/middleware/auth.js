@@ -1,40 +1,40 @@
-const express = require('express');
-const router = express.Router();
-const prisma = require('../db');
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-// Route de connexion (Login)
-router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
-  try {
-    // On cherche l'utilisateur par son email
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) {
-      return res.status(401).json({ message: 'Identifiants incorrects' });
-    }
+const JWT_SECRET = process.env.JWT_SECRET;
 
-    // On vérifie le mot de passe
-    const isValid = await bcrypt.compare(password, user.passwordHash);
-    if (!isValid) {
-      return res.status(401).json({ message: 'Identifiants incorrects' });
-    }
-
-    // On génère le jeton de connexion (JWT)
-    const token = jwt.sign(
-      { id: user.id, role: user.role },
-      process.env.JWT_SECRET || 'saintpaulcorbeil',
-      { expiresIn: '24h' }
-    );
-
-    res.json({
-      token,
-      user: { email: user.email, role: user.role }
-    });
-  } catch (error) {
-    console.error('Erreur Login:', error);
-    res.status(500).json({ error: 'Erreur lors de la connexion' });
+// Middleware to require a valid Bearer token
+function requireAuth(req, res, next) {
+  if (!JWT_SECRET) {
+    return res.status(500).json({ message: 'JWT non configuré côté serveur' });
   }
-});
 
-module.exports = router;
+  const authHeader = req.headers.authorization || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+
+  if (!token) {
+    return res.status(401).json({ message: 'Token manquant' });
+  }
+
+  try {
+    const payload = jwt.verify(token, JWT_SECRET);
+    req.user = payload;
+    next();
+  } catch (error) {
+    return res.status(401).json({ message: 'Token invalide ou expiré' });
+  }
+}
+
+// Middleware factory to enforce role-based access
+function requireRole(role) {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Non authentifié' });
+    }
+    if (req.user.role === 'ADMIN' || req.user.role === role) {
+      return next();
+    }
+    return res.status(403).json({ message: 'Accès refusé' });
+  };
+}
+
+module.exports = { requireAuth, requireRole };

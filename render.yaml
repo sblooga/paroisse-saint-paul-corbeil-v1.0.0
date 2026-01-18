@@ -3,14 +3,21 @@ services:
     name: paroisse-saint-paul-backend
     env: node
     plan: free
-    # On utilise la commande robuste qui trouve le schéma Prisma toute seule
-    buildCommand: cd server && npm install --legacy-peer-deps && npx prisma generate --schema=$(find . -name schema.prisma)
+    buildCommand: cd server && npm install --legacy-peer-deps && npx prisma generate
     startCommand: cd server && node index.js
     envVars:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
         sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_ROLE
+        value: ADMIN
+      - key: ADMIN_FORCE_RESET
+        value: "false"
       - key: CLOUDINARY_CLOUD_NAME
         sync: false
       - key: CLOUDINARY_API_KEY
@@ -24,7 +31,7 @@ services:
     name: paroisse-saint-paul-frontend
     env: static
     buildCommand: npm install && npm run build
-    staticPublishPath: ./dist
+    staticPublishPath: dist
     envVars:
       - key: VITE_API_URL
         value: https://paroisse-saint-paul-backend.onrender.com/api
