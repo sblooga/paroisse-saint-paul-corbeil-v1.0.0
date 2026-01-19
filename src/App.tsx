@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuthProvider } from "@/hooks/useAuth";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Parish from "./pages/Parish";
 import Contact from "./pages/Contact";
@@ -35,7 +35,7 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <BrowserRouter>
+          <HashRouter>
             <ScrollToTop />
             <Routes>
               <Route path="/" element={<Index />} />
@@ -61,7 +61,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
             <CookieConsent />
-          </BrowserRouter>
+          </HashRouter>
         </TooltipProvider>
       </AuthProvider>
     </ThemeProvider>
