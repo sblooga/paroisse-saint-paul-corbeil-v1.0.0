@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuthProvider } from "@/hooks/useAuth";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Parish from "./pages/Parish";
 import Contact from "./pages/Contact";
@@ -55,6 +55,8 @@ const App = () => (
               <Route path="/cookies" element={<CookiePolicy />} />
               <Route path="/telechargements" element={<Downloads />} />
               <Route path="/diagnostics" element={<Diagnostics />} />
+              {/* Certains hébergeurs réécrivent vers /index.html, on redirige vers la racine */}
+              <Route path="/index.html" element={<Navigate to="/" replace />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
