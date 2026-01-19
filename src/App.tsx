@@ -24,6 +24,7 @@ import Downloads from "./pages/Downloads";
 import NotFound from "./pages/NotFound";
 import CookieConsent from "./components/CookieConsent";
 import ScrollToTop from "./components/ScrollToTop";
+import Diagnostics from "./pages/Diagnostics";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +54,7 @@ const App = () => (
               <Route path="/confidentialite" element={<PrivacyPolicy />} />
               <Route path="/cookies" element={<CookiePolicy />} />
               <Route path="/telechargements" element={<Downloads />} />
+              <Route path="/diagnostics" element={<Diagnostics />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
