@@ -1,5 +1,6 @@
 import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
+import Diagnostics from "./Diagnostics";
 
 const NotFound = () => {
   const location = useLocation();
@@ -7,6 +8,11 @@ const NotFound = () => {
   useEffect(() => {
     console.error("404 Error: User attempted to access non-existent route:", location.pathname);
   }, [location.pathname]);
+
+  // Si la réécriture a abouti à cette 404 pour /diagnostics, on rend la page de test.
+  if (location.pathname === "/diagnostics") {
+    return <Diagnostics />;
+  }
 
   return (
     <main className="min-h-screen bg-background flex items-center justify-center px-4">
