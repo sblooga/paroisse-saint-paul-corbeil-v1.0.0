@@ -19,6 +19,8 @@
 - Variables à définir :
   - `VITE_API_URL=https://paroisse-saint-paul-backend.onrender.com/api`
 - Auto-deploy : activer sur la branche `main`.
+- Routage : actuellement en `HashRouter` pour éviter les soucis de réécriture Render. Les pages se visitent avec `#/` (ex. `https://paroisse-saint-paul-frontend.onrender.com/#/diagnostics`).
+- Page de diagnostic : `#/diagnostics` teste `/api/health` et `/api/articles`.
 
 ## Check & dépannage
 - Front 404/“Cannot GET /” : vérifier le service static et que `dist` est présent (build command correcte).
