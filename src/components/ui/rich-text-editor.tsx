@@ -203,11 +203,8 @@ export function RichTextEditor({
   };
 
   const deleteImage = () => {
-    if (!selectNearestImage()) {
-      toast.error('Placez le curseur sur l’image a supprimer.');
-      return;
-    }
-    editor.chain().focus().deleteNode('image').run();
+    // plus utilisé (suppression via clavier)
+    return;
   };
 
   const normalizeEmbedUrl = (url: string) => {
@@ -222,7 +219,9 @@ export function RichTextEditor({
     const url = window.prompt(`URL ${label} (YouTube, Drive, podcast, etc.) :`);
     if (!url) return;
 
-    if (label.toLowerCase().includes('fichier')) {
+    const lower = label.toLowerCase();
+
+    if (lower.includes('fichier')) {
       editor
         .chain()
         .focus()
@@ -233,12 +232,23 @@ export function RichTextEditor({
       return;
     }
 
+    if (lower.includes('podcast')) {
+      editor
+        .chain()
+        .focus()
+        .insertContent(
+          `<audio class="my-4 w-full" controls><source src="${url}" />Votre navigateur ne supporte pas l'audio.</audio>`
+        )
+        .run();
+      return;
+    }
+
     const normalized = normalizeEmbedUrl(url);
     editor
       .chain()
       .focus()
       .insertContent(
-        `<div class="embed-wrapper my-4"><iframe class="embed-video w-full rounded-md" src="${normalized}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen loading="lazy"></iframe></div>`
+        `<div class="embed-wrapper my-4 aspect-video"><iframe class="w-full h-full rounded-md" src="${normalized}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen loading="lazy"></iframe></div>`
       )
       .run();
   };
@@ -317,9 +327,6 @@ export function RichTextEditor({
         </Button>
         <Button type="button" variant="ghost" size="sm" onClick={() => updateImageAttribute('size', 'lg')} className={editor.isActive('image') ? 'bg-accent' : ''}>
           L
-        </Button>
-        <Button type="button" variant="ghost" size="sm" onClick={deleteImage} disabled={!editor.isActive('image')}>
-          Suppr img
         </Button>
         <div className="w-px h-6 bg-border mx-1" />
         <Button type="button" variant="ghost" size="sm" onClick={() => insertEmbed('video (YouTube, Vimeo, etc.)')}>
