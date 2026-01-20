@@ -37,7 +37,6 @@ interface RichTextEditorProps {
   className?: string;
 }
 
-// Compress image before upload
 const compressImage = async (file: File, maxWidth = 800, maxHeight = 600, quality = 0.8): Promise<Blob> => {
   return new Promise((resolve) => {
     const img = document.createElement('img');
@@ -46,7 +45,6 @@ const compressImage = async (file: File, maxWidth = 800, maxHeight = 600, qualit
 
     img.onload = () => {
       let { width, height } = img;
-
       if (width > maxWidth) {
         height = (height * maxWidth) / width;
         width = maxWidth;
@@ -55,11 +53,9 @@ const compressImage = async (file: File, maxWidth = 800, maxHeight = 600, qualit
         width = (width * maxHeight) / height;
         height = maxHeight;
       }
-
       canvas.width = width;
       canvas.height = height;
       ctx.drawImage(img, 0, 0, width, height);
-
       canvas.toBlob((blob) => resolve(blob!), 'image/webp', quality);
     };
 
@@ -79,12 +75,8 @@ export function RichTextEditor({
     addAttributes() {
       return {
         ...this.parent?.(),
-        align: {
-          default: 'center',
-        },
-        size: {
-          default: 'md',
-        },
+        align: { default: 'center' },
+        size: { default: 'md' },
       };
     },
     renderHTML({ HTMLAttributes }) {
@@ -136,7 +128,6 @@ export function RichTextEditor({
     },
   });
 
-  // Update editor content when prop changes
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
       editor.commands.setContent(content);
@@ -185,14 +176,10 @@ export function RichTextEditor({
       console.error(error);
     }
 
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  if (!editor) {
-    return null;
-  }
+  if (!editor) return null;
 
   const addLink = () => {
     const url = window.prompt('URL du lien:');
@@ -239,9 +226,9 @@ export function RichTextEditor({
   };
 
   const normalizeEmbedUrl = (url: string) => {
-    const ytMatch = url.match(/(?:youtu\\.be\\/|v=)([\\w-]{11})/);
+    const ytMatch = url.match(/(?:youtu\.be\/|v=)([\w-]{11})/);
     if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
-    const gdMatch = url.match(/file\\/d\\/([^/]+)/);
+    const gdMatch = url.match(/file\/d\/([^/]+)/);
     if (gdMatch) return `https://drive.google.com/file/d/${gdMatch[1]}/preview`;
     return url;
   };
