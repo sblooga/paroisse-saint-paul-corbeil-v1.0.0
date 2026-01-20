@@ -215,6 +215,12 @@ export function RichTextEditor({
     return url;
   };
 
+  const normalizeAudioUrl = (url: string) => {
+    const gdMatch = url.match(/file\/d\/([^/]+)/);
+    if (gdMatch) return `https://drive.google.com/uc?export=download&id=${gdMatch[1]}`;
+    return url;
+  };
+
   const insertEmbed = (label: string) => {
     const url = window.prompt(`URL ${label} (YouTube, Drive, podcast, etc.) :`);
     if (!url) return;
@@ -233,11 +239,12 @@ export function RichTextEditor({
     }
 
     if (lower.includes('podcast')) {
+      const audioUrl = normalizeAudioUrl(url);
       editor
         .chain()
         .focus()
         .insertContent(
-          `<audio class="my-4 w-full" controls><source src="${url}" />Votre navigateur ne supporte pas l'audio.</audio>`
+          `<audio class="my-4 w-full" controls><source src="${audioUrl}" />Votre navigateur ne supporte pas l'audio.</audio>`
         )
         .run();
       return;
