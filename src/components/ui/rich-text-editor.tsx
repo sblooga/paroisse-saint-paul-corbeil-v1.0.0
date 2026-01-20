@@ -251,11 +251,11 @@ export function RichTextEditor({
     editor.chain().focus().updateAttributes('image', { [key]: value }).run();
   };
 
-  const insertEmbed = (label: string) => {
-    const url = window.prompt(`URL ${label} (YouTube, Drive, Podcast, etc.) :`);
-    if (!url) return;
-    editor
-      .chain()
+const insertEmbed = (label: string) => {
+  const url = window.prompt(`URL ${label} (YouTube, Drive, Podcast, etc.) :`);
+  if (!url) return;
+  editor
+    .chain()
       .focus()
       .insertContent(
         `<iframe class="embed-video w-full my-4 rounded-md" src="${url}" frameborder="0" allowfullscreen loading="lazy"></iframe>`
@@ -265,6 +265,7 @@ export function RichTextEditor({
 
   return (
     <div className={cn('border rounded-md bg-background', className)}>
+      <style>{`.ProseMirror-selectednode { outline: 2px solid #2563eb; }`}</style>
       <div className="flex flex-wrap gap-1 p-2 border-b bg-muted/50">
         <Button
           type="button"
@@ -424,6 +425,7 @@ export function RichTextEditor({
           variant="ghost"
           size="sm"
           onClick={() => updateImageAttribute('align', 'left')}
+          className={editor.isActive('image') ? 'bg-accent' : ''}
         >
           <ImageIcon className="h-4 w-4" />
           <span className="sr-only">Image gauche</span>
@@ -433,6 +435,7 @@ export function RichTextEditor({
           variant="ghost"
           size="sm"
           onClick={() => updateImageAttribute('align', 'center')}
+          className={editor.isActive('image') ? 'bg-accent' : ''}
         >
           <ImageIcon className="h-4 w-4" />
           <span className="sr-only">Image centrée</span>
@@ -442,6 +445,7 @@ export function RichTextEditor({
           variant="ghost"
           size="sm"
           onClick={() => updateImageAttribute('align', 'right')}
+          className={editor.isActive('image') ? 'bg-accent' : ''}
         >
           <ImageIcon className="h-4 w-4" />
           <span className="sr-only">Image droite</span>
@@ -469,6 +473,19 @@ export function RichTextEditor({
           onClick={() => updateImageAttribute('size', 'lg')}
         >
           L
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            if (editor.isActive('image')) {
+              editor.chain().focus().deleteNode('image').run();
+            }
+          }}
+          disabled={!editor.isActive('image')}
+        >
+          Suppr img
         </Button>
         <div className="w-px h-6 bg-border mx-1" />
         <Button
