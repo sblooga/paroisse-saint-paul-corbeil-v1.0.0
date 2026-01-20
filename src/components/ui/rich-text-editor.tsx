@@ -20,10 +20,6 @@ import {
   Heading2,
   Heading3,
   ImagePlus,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-  AlignJustify,
   Smile,
   Play,
   FileAudio,
@@ -50,7 +46,7 @@ const compressImage = async (file: File, maxWidth = 800, maxHeight = 600, qualit
 
     img.onload = () => {
       let { width, height } = img;
-      
+
       if (width > maxWidth) {
         height = (height * maxWidth) / width;
         width = maxWidth;
@@ -63,7 +59,7 @@ const compressImage = async (file: File, maxWidth = 800, maxHeight = 600, qualit
       canvas.width = width;
       canvas.height = height;
       ctx.drawImage(img, 0, 0, width, height);
-      
+
       canvas.toBlob((blob) => resolve(blob!), 'image/webp', quality);
     };
 
@@ -108,43 +104,21 @@ export function RichTextEditor({
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        heading: {
-          levels: [1, 2, 3],
-        },
-        bulletList: {
-          HTMLAttributes: {
-            class: 'list-disc pl-6 space-y-1',
-          },
-        },
-        orderedList: {
-          HTMLAttributes: {
-            class: 'list-decimal pl-6 space-y-1',
-          },
-        },
-        blockquote: {
-          HTMLAttributes: {
-            class: 'border-l-4 border-primary pl-4 italic my-4',
-          },
-        },
-        paragraph: {
-          HTMLAttributes: {
-            class: 'mb-2',
-          },
-        },
+        heading: { levels: [1, 2, 3] },
+        bulletList: { HTMLAttributes: { class: 'list-disc pl-6 space-y-1' } },
+        orderedList: { HTMLAttributes: { class: 'list-decimal pl-6 space-y-1' } },
+        blockquote: { HTMLAttributes: { class: 'border-l-4 border-primary pl-4 italic my-4' } },
+        paragraph: { HTMLAttributes: { class: 'mb-2' } },
       }),
       Link.configure({
         openOnClick: false,
-        HTMLAttributes: {
-          class: 'text-primary underline',
-        },
+        HTMLAttributes: { class: 'text-primary underline' },
       }),
       CustomImage.configure({
         inline: false,
         allowBase64: false,
       }),
-      Placeholder.configure({
-        placeholder,
-      }),
+      Placeholder.configure({ placeholder }),
       TextAlign.configure({
         types: ['heading', 'paragraph'],
         alignments: ['left', 'center', 'right', 'justify'],
@@ -173,22 +147,17 @@ export function RichTextEditor({
     const file = e.target.files?.[0];
     if (!file || !editor) return;
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       toast.error('Seules les images sont acceptées');
       return;
     }
-
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error('Image trop volumineuse (max 5Mo)');
       return;
     }
 
     try {
-      toast.loading('Téléchargement de l\'image...');
-      
-      // Compress image (skip for GIFs)
+      toast.loading('Téléchargement de l’image...');
       let fileToUpload: Blob | File = file;
       if (!file.type.includes('gif')) {
         fileToUpload = await compressImage(file);
@@ -206,10 +175,7 @@ export function RichTextEditor({
 
       if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage
-        .from('media')
-        .getPublicUrl(filePath);
-
+      const { data: urlData } = supabase.storage.from('media').getPublicUrl(filePath);
       editor.chain().focus().setImage({ src: urlData.publicUrl }).run();
       toast.dismiss();
       toast.success('Image ajoutée');
@@ -219,7 +185,6 @@ export function RichTextEditor({
       console.error(error);
     }
 
-    // Reset input
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -231,34 +196,65 @@ export function RichTextEditor({
 
   const addLink = () => {
     const url = window.prompt('URL du lien:');
-    if (url) {
-      editor.chain().focus().setLink({ href: url }).run();
-    }
+    if (url) editor.chain().focus().setLink({ href: url }).run();
   };
 
   const insertEmoji = () => {
     const emoji = window.prompt('Emoji à insérer (ex: 🙂 🙏 ❤️) :');
-    if (emoji) {
-      editor.chain().focus().insertContent(emoji).run();
-    }
+    if (emoji) editor.chain().focus().insertContent(emoji).run();
   };
 
   const setTextAlign = (align: 'left' | 'center' | 'right' | 'justify') => {
     editor.chain().focus().setTextAlign(align).run();
   };
 
+  const selectNearestImage = () => {
+    const { state } = editor;
+    const { $from } = state.selection;
+    const nodeAfter = $from.nodeAfter;
+    const nodeBefore = $from.nodeBefore;
+    if (nodeAfter?.type.name === 'image') {
+      editor.commands.setNodeSelection($from.pos);
+      return true;
+    }
+    if (nodeBefore?.type.name === 'image') {
+      const pos = $from.pos - nodeBefore.nodeSize;
+      editor.commands.setNodeSelection(pos);
+      return true;
+    }
+    return false;
+  };
+
   const updateImageAttribute = (key: 'align' | 'size', value: string) => {
+    if (!selectNearestImage()) return;
     editor.chain().focus().updateAttributes('image', { [key]: value }).run();
   };
 
-const insertEmbed = (label: string) => {
-  const url = window.prompt(`URL ${label} (YouTube, Drive, Podcast, etc.) :`);
-  if (!url) return;
-  editor
-    .chain()
+  const deleteImage = () => {
+    if (!selectNearestImage()) {
+      toast.error('Placez le curseur sur l’image à supprimer.');
+      return;
+    }
+    editor.chain().focus().deleteNode('image').run();
+  };
+
+  const normalizeEmbedUrl = (url: string) => {
+    const ytMatch = url.match(/(?:youtu\\.be\\/|v=)([\\w-]{11})/);
+    if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
+    const gdMatch = url.match(/file\\/d\\/([^/]+)/);
+    if (gdMatch) return `https://drive.google.com/file/d/${gdMatch[1]}/preview`;
+    return url;
+  };
+
+  const insertEmbed = (label: string) => {
+    const url = window.prompt(`URL ${label} (YouTube, Drive, Podcast, etc.) :`);
+    if (!url) return;
+    const normalized = normalizeEmbedUrl(url);
+    editor
+      .chain()
       .focus()
       .insertContent(
-        `<iframe class="embed-video w-full my-4 rounded-md" src="${url}" frameborder="0" allowfullscreen loading="lazy"></iframe>`
+        `<iframe class="embed-video w-full my-4 rounded-md" src="${normalized}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen loading="lazy"></iframe>`
       )
       .run();
   };
@@ -267,268 +263,95 @@ const insertEmbed = (label: string) => {
     <div className={cn('border rounded-md bg-background', className)}>
       <style>{`.ProseMirror-selectednode { outline: 2px solid #2563eb; }`}</style>
       <div className="flex flex-wrap gap-1 p-2 border-b bg-muted/50">
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className={editor.isActive('bold') ? 'bg-accent' : ''}
-        >
+        <Button type="button" variant="ghost" size="sm" onClick={() => editor.chain().focus().toggleBold().run()} className={editor.isActive('bold') ? 'bg-accent' : ''}>
           <Bold className="h-4 w-4" />
         </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={editor.isActive('italic') ? 'bg-accent' : ''}
-        >
+        <Button type="button" variant="ghost" size="sm" onClick={() => editor.chain().focus().toggleItalic().run()} className={editor.isActive('italic') ? 'bg-accent' : ''}>
           <Italic className="h-4 w-4" />
         </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleStrike().run()}
-          className={editor.isActive('strike') ? 'bg-accent' : ''}
-        >
+        <Button type="button" variant="ghost" size="sm" onClick={() => editor.chain().focus().toggleStrike().run()} className={editor.isActive('strike') ? 'bg-accent' : ''}>
           <Strikethrough className="h-4 w-4" />
         </Button>
         <div className="w-px h-6 bg-border mx-1" />
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-          className={editor.isActive('heading', { level: 1 }) ? 'bg-accent' : ''}
-        >
+        <Button type="button" variant="ghost" size="sm" onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className={editor.isActive('heading', { level: 1 }) ? 'bg-accent' : ''}>
           <Heading1 className="h-4 w-4" />
         </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          className={editor.isActive('heading', { level: 2 }) ? 'bg-accent' : ''}
-        >
+        <Button type="button" variant="ghost" size="sm" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={editor.isActive('heading', { level: 2 }) ? 'bg-accent' : ''}>
           <Heading2 className="h-4 w-4" />
         </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-          className={editor.isActive('heading', { level: 3 }) ? 'bg-accent' : ''}
-        >
+        <Button type="button" variant="ghost" size="sm" onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} className={editor.isActive('heading', { level: 3 }) ? 'bg-accent' : ''}>
           <Heading3 className="h-4 w-4" />
         </Button>
         <div className="w-px h-6 bg-border mx-1" />
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={editor.isActive('bulletList') ? 'bg-accent' : ''}
-        >
+        <Button type="button" variant="ghost" size="sm" onClick={() => editor.chain().focus().toggleBulletList().run()} className={editor.isActive('bulletList') ? 'bg-accent' : ''}>
           <List className="h-4 w-4" />
         </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={editor.isActive('orderedList') ? 'bg-accent' : ''}
-        >
+        <Button type="button" variant="ghost" size="sm" onClick={() => editor.chain().focus().toggleOrderedList().run()} className={editor.isActive('orderedList') ? 'bg-accent' : ''}>
           <ListOrdered className="h-4 w-4" />
         </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          className={editor.isActive('blockquote') ? 'bg-accent' : ''}
-        >
+        <Button type="button" variant="ghost" size="sm" onClick={() => editor.chain().focus().toggleBlockquote().run()} className={editor.isActive('blockquote') ? 'bg-accent' : ''}>
           <Quote className="h-4 w-4" />
         </Button>
         <div className="w-px h-6 bg-border mx-1" />
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => setTextAlign('left')}
-          className={editor.isActive({ textAlign: 'left' }) ? 'bg-accent' : ''}
-        >
-          <AlignLeft className="h-4 w-4" />
+        <Button type="button" variant="ghost" size="sm" onClick={() => setTextAlign('left')} className={editor.isActive({ textAlign: 'left' }) ? 'bg-accent' : ''}>
+          G
         </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => setTextAlign('center')}
-          className={editor.isActive({ textAlign: 'center' }) ? 'bg-accent' : ''}
-        >
-          <AlignCenter className="h-4 w-4" />
+        <Button type="button" variant="ghost" size="sm" onClick={() => setTextAlign('center')} className={editor.isActive({ textAlign: 'center' }) ? 'bg-accent' : ''}>
+          C
         </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => setTextAlign('right')}
-          className={editor.isActive({ textAlign: 'right' }) ? 'bg-accent' : ''}
-        >
-          <AlignRight className="h-4 w-4" />
+        <Button type="button" variant="ghost" size="sm" onClick={() => setTextAlign('right')} className={editor.isActive({ textAlign: 'right' }) ? 'bg-accent' : ''}>
+          D
         </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => setTextAlign('justify')}
-          className={editor.isActive({ textAlign: 'justify' }) ? 'bg-accent' : ''}
-        >
-          <AlignJustify className="h-4 w-4" />
+        <Button type="button" variant="ghost" size="sm" onClick={() => setTextAlign('justify')} className={editor.isActive({ textAlign: 'justify' }) ? 'bg-accent' : ''}>
+          J
         </Button>
         <div className="w-px h-6 bg-border mx-1" />
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={addLink}
-          className={editor.isActive('link') ? 'bg-accent' : ''}
-        >
+        <Button type="button" variant="ghost" size="sm" onClick={addLink} className={editor.isActive('link') ? 'bg-accent' : ''}>
           <LinkIcon className="h-4 w-4" />
         </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={insertEmoji}
-        >
+        <Button type="button" variant="ghost" size="sm" onClick={insertEmoji}>
           <Smile className="h-4 w-4" />
         </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => fileInputRef.current?.click()}
-        >
+        <Button type="button" variant="ghost" size="sm" onClick={() => fileInputRef.current?.click()}>
           <ImagePlus className="h-4 w-4" />
         </Button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleImageUpload}
-          className="hidden"
-        />
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => updateImageAttribute('align', 'left')}
-          className={editor.isActive('image') ? 'bg-accent' : ''}
-        >
-          <ImageIcon className="h-4 w-4" />
-          <span className="sr-only">Image gauche</span>
+        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+        <Button type="button" variant="ghost" size="sm" onClick={() => updateImageAttribute('align', 'left')} className={editor.isActive('image') ? 'bg-accent' : ''}>
+          G
         </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => updateImageAttribute('align', 'center')}
-          className={editor.isActive('image') ? 'bg-accent' : ''}
-        >
-          <ImageIcon className="h-4 w-4" />
-          <span className="sr-only">Image centrée</span>
+        <Button type="button" variant="ghost" size="sm" onClick={() => updateImageAttribute('align', 'center')} className={editor.isActive('image') ? 'bg-accent' : ''}>
+          C
         </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => updateImageAttribute('align', 'right')}
-          className={editor.isActive('image') ? 'bg-accent' : ''}
-        >
-          <ImageIcon className="h-4 w-4" />
-          <span className="sr-only">Image droite</span>
+        <Button type="button" variant="ghost" size="sm" onClick={() => updateImageAttribute('align', 'right')} className={editor.isActive('image') ? 'bg-accent' : ''}>
+          D
         </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => updateImageAttribute('size', 'sm')}
-        >
+        <Button type="button" variant="ghost" size="sm" onClick={() => updateImageAttribute('size', 'sm')} className={editor.isActive('image') ? 'bg-accent' : ''}>
           S
         </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => updateImageAttribute('size', 'md')}
-        >
+        <Button type="button" variant="ghost" size="sm" onClick={() => updateImageAttribute('size', 'md')} className={editor.isActive('image') ? 'bg-accent' : ''}>
           M
         </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => updateImageAttribute('size', 'lg')}
-        >
+        <Button type="button" variant="ghost" size="sm" onClick={() => updateImageAttribute('size', 'lg')} className={editor.isActive('image') ? 'bg-accent' : ''}>
           L
         </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            if (editor.isActive('image')) {
-              editor.chain().focus().deleteNode('image').run();
-            }
-          }}
-          disabled={!editor.isActive('image')}
-        >
+        <Button type="button" variant="ghost" size="sm" onClick={deleteImage} disabled={!editor.isActive('image')}>
           Suppr img
         </Button>
         <div className="w-px h-6 bg-border mx-1" />
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => insertEmbed('vidéo (YouTube, Vimeo, etc.)')}
-        >
+        <Button type="button" variant="ghost" size="sm" onClick={() => insertEmbed('vidéo (YouTube, Vimeo, etc.)')}>
           <Play className="h-4 w-4" />
         </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => insertEmbed('podcast')}
-        >
+        <Button type="button" variant="ghost" size="sm" onClick={() => insertEmbed('podcast')}>
           <FileAudio className="h-4 w-4" />
         </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => insertEmbed('fichier (Google Drive, PDF intégré)')}
-        >
+        <Button type="button" variant="ghost" size="sm" onClick={() => insertEmbed('fichier (Google Drive, PDF intégré)')}>
           <FileDown className="h-4 w-4" />
         </Button>
         <div className="w-px h-6 bg-border mx-1" />
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().undo().run()}
-          disabled={!editor.can().undo()}
-        >
+        <Button type="button" variant="ghost" size="sm" onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()}>
           <Undo className="h-4 w-4" />
         </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().redo().run()}
-          disabled={!editor.can().redo()}
-        >
+        <Button type="button" variant="ghost" size="sm" onClick={() => editor.chain().focus().redo().run()} disabled={!editor.can().redo()}>
           <Redo className="h-4 w-4" />
         </Button>
       </div>
