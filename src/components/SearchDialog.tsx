@@ -112,7 +112,7 @@ const SearchDialog = ({ open, onOpenChange }: SearchDialogProps) => {
             id: page.id,
             title,
             type: 'page',
-            url: `/${page.slug}`,
+            url: `/pages/${page.slug}`,
             subtitle: desc?.substring(0, 60) + (desc && desc.length > 60 ? '...' : ''),
           });
         });

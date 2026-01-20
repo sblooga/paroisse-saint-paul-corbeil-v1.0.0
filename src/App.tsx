@@ -25,6 +25,7 @@ import NotFound from "./pages/NotFound";
 import CookieConsent from "./components/CookieConsent";
 import ScrollToTop from "./components/ScrollToTop";
 import Diagnostics from "./pages/Diagnostics";
+import PageView from "./pages/PageView";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,7 @@ const App = () => (
               <Route path="/cookies" element={<CookiePolicy />} />
               <Route path="/telechargements" element={<Downloads />} />
               <Route path="/diagnostics" element={<Diagnostics />} />
+              <Route path="/pages/:slug" element={<PageView />} />
               {/* Certains hébergeurs réécrivent vers /index.html, on redirige vers la racine */}
               <Route path="/index.html" element={<Navigate to="/" replace />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

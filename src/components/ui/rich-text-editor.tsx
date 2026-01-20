@@ -4,6 +4,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
+import TextAlign from '@tiptap/extension-text-align';
 import { Button } from './button';
 import {
   Bold,
@@ -19,6 +20,15 @@ import {
   Heading2,
   Heading3,
   ImagePlus,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  AlignJustify,
+  Smile,
+  Play,
+  FileAudio,
+  FileDown,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -69,6 +79,32 @@ export function RichTextEditor({
 }: RichTextEditorProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const CustomImage = Image.extend({
+    addAttributes() {
+      return {
+        ...this.parent?.(),
+        align: {
+          default: 'center',
+        },
+        size: {
+          default: 'md',
+        },
+      };
+    },
+    renderHTML({ HTMLAttributes }) {
+      const align = HTMLAttributes.align || 'center';
+      const size = HTMLAttributes.size || 'md';
+      const alignClass =
+        align === 'left' ? 'float-left mr-4' :
+        align === 'right' ? 'float-right ml-4' : 'mx-auto';
+      const sizeClass =
+        size === 'sm' ? 'max-w-xs' :
+        size === 'lg' ? 'max-w-full' : 'max-w-md';
+      const classList = `${alignClass} ${sizeClass} h-auto rounded-md my-4`;
+      return ['img', { ...HTMLAttributes, class: classList }];
+    },
+  });
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -102,15 +138,16 @@ export function RichTextEditor({
           class: 'text-primary underline',
         },
       }),
-      Image.configure({
+      CustomImage.configure({
         inline: false,
         allowBase64: false,
-        HTMLAttributes: {
-          class: 'max-w-full h-auto rounded-md my-4',
-        },
       }),
       Placeholder.configure({
         placeholder,
+      }),
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+        alignments: ['left', 'center', 'right', 'justify'],
       }),
     ],
     content,
@@ -119,7 +156,8 @@ export function RichTextEditor({
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none focus:outline-none min-h-[200px] p-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_blockquote]:border-l-4 [&_blockquote]:border-primary [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:my-4 [&_p]:mb-2 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mb-4 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mb-3 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:mb-2',
+        class: 'prose prose-sm max-w-none focus:outline-none min-h-[200px] p-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_blockquote]:border-l-4 [&_blockquote]:border-primary [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:my-4 [&_p]:mb-2 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mb-4 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mb-3 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:mb-2 [&_h1]:font-playfair [&_h2]:font-playfair [&_h3]:font-playfair [&_p]:font-sans',
+        spellcheck: 'true',
       },
     },
   });
@@ -196,6 +234,33 @@ export function RichTextEditor({
     if (url) {
       editor.chain().focus().setLink({ href: url }).run();
     }
+  };
+
+  const insertEmoji = () => {
+    const emoji = window.prompt('Emoji à insérer (ex: 🙂 🙏 ❤️) :');
+    if (emoji) {
+      editor.chain().focus().insertContent(emoji).run();
+    }
+  };
+
+  const setTextAlign = (align: 'left' | 'center' | 'right' | 'justify') => {
+    editor.chain().focus().setTextAlign(align).run();
+  };
+
+  const updateImageAttribute = (key: 'align' | 'size', value: string) => {
+    editor.chain().focus().updateAttributes('image', { [key]: value }).run();
+  };
+
+  const insertEmbed = (label: string) => {
+    const url = window.prompt(`URL ${label} (YouTube, Drive, Podcast, etc.) :`);
+    if (!url) return;
+    editor
+      .chain()
+      .focus()
+      .insertContent(
+        `<iframe class="embed-video w-full my-4 rounded-md" src="${url}" frameborder="0" allowfullscreen loading="lazy"></iframe>`
+      )
+      .run();
   };
 
   return (
@@ -289,10 +354,55 @@ export function RichTextEditor({
           type="button"
           variant="ghost"
           size="sm"
+          onClick={() => setTextAlign('left')}
+          className={editor.isActive({ textAlign: 'left' }) ? 'bg-accent' : ''}
+        >
+          <AlignLeft className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => setTextAlign('center')}
+          className={editor.isActive({ textAlign: 'center' }) ? 'bg-accent' : ''}
+        >
+          <AlignCenter className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => setTextAlign('right')}
+          className={editor.isActive({ textAlign: 'right' }) ? 'bg-accent' : ''}
+        >
+          <AlignRight className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => setTextAlign('justify')}
+          className={editor.isActive({ textAlign: 'justify' }) ? 'bg-accent' : ''}
+        >
+          <AlignJustify className="h-4 w-4" />
+        </Button>
+        <div className="w-px h-6 bg-border mx-1" />
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
           onClick={addLink}
           className={editor.isActive('link') ? 'bg-accent' : ''}
         >
           <LinkIcon className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={insertEmoji}
+        >
+          <Smile className="h-4 w-4" />
         </Button>
         <Button
           type="button"
@@ -309,6 +419,82 @@ export function RichTextEditor({
           onChange={handleImageUpload}
           className="hidden"
         />
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => updateImageAttribute('align', 'left')}
+        >
+          <ImageIcon className="h-4 w-4" />
+          <span className="sr-only">Image gauche</span>
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => updateImageAttribute('align', 'center')}
+        >
+          <ImageIcon className="h-4 w-4" />
+          <span className="sr-only">Image centrée</span>
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => updateImageAttribute('align', 'right')}
+        >
+          <ImageIcon className="h-4 w-4" />
+          <span className="sr-only">Image droite</span>
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => updateImageAttribute('size', 'sm')}
+        >
+          S
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => updateImageAttribute('size', 'md')}
+        >
+          M
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => updateImageAttribute('size', 'lg')}
+        >
+          L
+        </Button>
+        <div className="w-px h-6 bg-border mx-1" />
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => insertEmbed('vidéo (YouTube, Vimeo, etc.)')}
+        >
+          <Play className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => insertEmbed('podcast')}
+        >
+          <FileAudio className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => insertEmbed('fichier (Google Drive, PDF intégré)')}
+        >
+          <FileDown className="h-4 w-4" />
+        </Button>
         <div className="w-px h-6 bg-border mx-1" />
         <Button
           type="button"
