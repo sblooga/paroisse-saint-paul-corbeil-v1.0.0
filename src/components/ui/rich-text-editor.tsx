@@ -42,7 +42,6 @@ const compressImage = async (file: File, maxWidth = 800, maxHeight = 600, qualit
     const img = document.createElement('img');
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d')!;
-
     img.onload = () => {
       let { width, height } = img;
       if (width > maxWidth) {
@@ -58,7 +57,6 @@ const compressImage = async (file: File, maxWidth = 800, maxHeight = 600, qualit
       ctx.drawImage(img, 0, 0, width, height);
       canvas.toBlob((blob) => resolve(blob!), 'image/webp', quality);
     };
-
     img.src = URL.createObjectURL(file);
   });
 };
@@ -66,7 +64,7 @@ const compressImage = async (file: File, maxWidth = 800, maxHeight = 600, qualit
 export function RichTextEditor({
   content,
   onChange,
-  placeholder = 'Commencez à écrire...',
+  placeholder = 'Commencez a ecrire...',
   className,
 }: RichTextEditorProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -117,9 +115,7 @@ export function RichTextEditor({
       }),
     ],
     content,
-    onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
-    },
+    onUpdate: ({ editor }) => onChange(editor.getHTML()),
     editorProps: {
       attributes: {
         class: 'prose prose-sm max-w-none focus:outline-none min-h-[200px] p-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_blockquote]:border-l-4 [&_blockquote]:border-primary [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:my-4 [&_p]:mb-2 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mb-4 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mb-3 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:mb-2 [&_h1]:font-playfair [&_h2]:font-playfair [&_h3]:font-playfair [&_p]:font-sans',
@@ -137,45 +133,34 @@ export function RichTextEditor({
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !editor) return;
-
     if (!file.type.startsWith('image/')) {
-      toast.error('Seules les images sont acceptées');
+      toast.error('Seules les images sont acceptees');
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
       toast.error('Image trop volumineuse (max 5Mo)');
       return;
     }
-
     try {
-      toast.loading('Téléchargement de l’image...');
+      toast.loading('Telechargement de l’image...');
       let fileToUpload: Blob | File = file;
-      if (!file.type.includes('gif')) {
-        fileToUpload = await compressImage(file);
-      }
-
+      if (!file.type.includes('gif')) fileToUpload = await compressImage(file);
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.webp`;
       const filePath = `articles/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('media')
-        .upload(filePath, fileToUpload, {
-          contentType: 'image/webp',
-          upsert: false,
-        });
-
+      const { error: uploadError } = await supabase.storage.from('media').upload(filePath, fileToUpload, {
+        contentType: 'image/webp',
+        upsert: false,
+      });
       if (uploadError) throw uploadError;
-
       const { data: urlData } = supabase.storage.from('media').getPublicUrl(filePath);
       editor.chain().focus().setImage({ src: urlData.publicUrl }).run();
       toast.dismiss();
-      toast.success('Image ajoutée');
+      toast.success('Image ajoutee');
     } catch (error) {
       toast.dismiss();
-      toast.error('Erreur lors du téléchargement');
+      toast.error('Erreur lors du telechargement');
       console.error(error);
     }
-
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -187,7 +172,7 @@ export function RichTextEditor({
   };
 
   const insertEmoji = () => {
-    const emoji = window.prompt('Emoji à insérer (ex: 🙂 🙏 ❤️) :');
+    const emoji = window.prompt('Emoji a inserer (ex: 🙂 🙏 ❤️) :');
     if (emoji) editor.chain().focus().insertContent(emoji).run();
   };
 
@@ -219,7 +204,7 @@ export function RichTextEditor({
 
   const deleteImage = () => {
     if (!selectNearestImage()) {
-      toast.error('Placez le curseur sur l’image à supprimer.');
+      toast.error('Placez le curseur sur l’image a supprimer.');
       return;
     }
     editor.chain().focus().deleteNode('image').run();
@@ -234,14 +219,26 @@ export function RichTextEditor({
   };
 
   const insertEmbed = (label: string) => {
-    const url = window.prompt(`URL ${label} (YouTube, Drive, Podcast, etc.) :`);
+    const url = window.prompt(`URL ${label} (YouTube, Drive, podcast, etc.) :`);
     if (!url) return;
+
+    if (label.toLowerCase().includes('fichier')) {
+      editor
+        .chain()
+        .focus()
+        .insertContent(
+          `<p class="my-4"><a class="text-primary underline" href="${url}" target="_blank" rel="noopener noreferrer">Fichier Google Drive</a></p>`
+        )
+        .run();
+      return;
+    }
+
     const normalized = normalizeEmbedUrl(url);
     editor
       .chain()
       .focus()
       .insertContent(
-        `<iframe class="embed-video w-full my-4 rounded-md" src="${normalized}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen loading="lazy"></iframe>`
+        `<div class="embed-wrapper my-4"><iframe class="embed-video w-full rounded-md" src="${normalized}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen loading="lazy"></iframe></div>`
       )
       .run();
   };
@@ -325,13 +322,13 @@ export function RichTextEditor({
           Suppr img
         </Button>
         <div className="w-px h-6 bg-border mx-1" />
-        <Button type="button" variant="ghost" size="sm" onClick={() => insertEmbed('vidéo (YouTube, Vimeo, etc.)')}>
+        <Button type="button" variant="ghost" size="sm" onClick={() => insertEmbed('video (YouTube, Vimeo, etc.)')}>
           <Play className="h-4 w-4" />
         </Button>
         <Button type="button" variant="ghost" size="sm" onClick={() => insertEmbed('podcast')}>
           <FileAudio className="h-4 w-4" />
         </Button>
-        <Button type="button" variant="ghost" size="sm" onClick={() => insertEmbed('fichier (Google Drive, PDF intégré)')}>
+        <Button type="button" variant="ghost" size="sm" onClick={() => insertEmbed('fichier (Google Drive, PDF integre)')}>
           <FileDown className="h-4 w-4" />
         </Button>
         <div className="w-px h-6 bg-border mx-1" />
