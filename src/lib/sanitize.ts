@@ -15,8 +15,8 @@ export const sanitizeHtml = (html: string): string => {
   const decoded = decodeHtml(html);
 
   return DOMPurify.sanitize(decoded, {
-    ALLOWED_TAGS: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'strong', 'em', 'a', 'br', 'span', 'div', 'blockquote', 'img', 'iframe'],
-    ALLOWED_ATTR: ['href', 'target', 'rel', 'src', 'alt', 'class', 'style', 'title', 'allow', 'loading', 'frameborder', 'allowfullscreen'],
+    ALLOWED_TAGS: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'strong', 'em', 'a', 'br', 'span', 'div', 'blockquote', 'img', 'iframe', 'audio', 'source'],
+    ALLOWED_ATTR: ['href', 'target', 'rel', 'src', 'alt', 'class', 'style', 'title', 'allow', 'loading', 'frameborder', 'allowfullscreen', 'controls', 'type'],
     ALLOW_DATA_ATTR: false,
   });
 };
