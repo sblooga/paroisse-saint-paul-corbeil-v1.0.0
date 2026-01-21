@@ -71,7 +71,7 @@ const AdminArticles = () => {
       .from('articles')
       .select('*')
       .order('created_at', { ascending: false });
-    
+
     if (data) setArticles(data as Article[]);
     if (error) console.error('Error fetching articles:', error);
     setLoading(false);
@@ -145,7 +145,7 @@ const AdminArticles = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.title_fr || !formData.slug) {
       toast({ title: 'Erreur', description: 'Titre (FR) et slug requis', variant: 'destructive' });
       return;
@@ -173,7 +173,7 @@ const AdminArticles = () => {
         .from('articles')
         .update(dataToSend)
         .eq('id', editingArticle.id);
-      
+
       if (error) {
         toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
       } else {
@@ -186,7 +186,7 @@ const AdminArticles = () => {
       const { error } = await supabase
         .from('articles')
         .insert([dataToSend]);
-      
+
       if (error) {
         toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
       } else {
@@ -203,7 +203,7 @@ const AdminArticles = () => {
       .from('articles')
       .update({ published: !currentStatus })
       .eq('id', id);
-    
+
     if (!error) {
       setArticles(prev => prev.map(a => a.id === id ? { ...a, published: !currentStatus } : a));
       toast({ title: currentStatus ? 'Article dépublié' : 'Article publié' });
@@ -212,12 +212,12 @@ const AdminArticles = () => {
 
   const deleteArticle = async (id: string) => {
     if (!confirm('Supprimer cet article ?')) return;
-    
+
     const { error } = await supabase
       .from('articles')
       .delete()
       .eq('id', id);
-    
+
     if (!error) {
       setArticles(prev => prev.filter(a => a.id !== id));
       toast({ title: 'Article supprimé' });
@@ -290,7 +290,7 @@ const AdminArticles = () => {
                   <TabsTrigger value="fr">🇫🇷 Français</TabsTrigger>
                   <TabsTrigger value="pl">🇵🇱 Polski</TabsTrigger>
                 </TabsList>
-                
+
                 <TabsContent value="fr" className="space-y-4 mt-4">
                   <div className="space-y-2">
                     <Label htmlFor="title_fr">Titre (FR) *</Label>
@@ -320,7 +320,7 @@ const AdminArticles = () => {
                     />
                   </div>
                 </TabsContent>
-                
+
                 <TabsContent value="pl" className="space-y-4 mt-4">
                   <div className="space-y-2">
                     <Label htmlFor="title_pl">Titre (PL)</Label>

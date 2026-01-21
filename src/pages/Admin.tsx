@@ -6,7 +6,7 @@ import {
   Mail, Users, MessageSquare, LogOut,
   Check, RefreshCw, LayoutDashboard, FileText,
   Calendar, UsersRound, Newspaper, Link as LinkIcon, ShieldCheck, Lock,
-  HelpCircle, Heart
+  HelpCircle, Heart, Headphones
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -23,8 +23,9 @@ import AdminDocsPassword from '@/components/admin/AdminDocsPassword';
 import AdminFAQ from '@/components/admin/AdminFAQ';
 import AdminLifeStages from '@/components/admin/AdminLifeStages';
 import ChangePasswordDialog from '@/components/admin/ChangePasswordDialog';
+import AdminHomilies from '@/components/admin/AdminHomilies';
 
-type TabType = 'messages' | 'subscribers' | 'articles' | 'pages' | 'team' | 'schedules' | 'footerLinks' | 'users' | 'docsPassword' | 'faq' | 'lifeStages';
+type TabType = 'messages' | 'subscribers' | 'articles' | 'pages' | 'team' | 'schedules' | 'footerLinks' | 'users' | 'docsPassword' | 'faq' | 'lifeStages' | 'homilies';
 
 interface Stats {
   messages: number;
@@ -239,6 +240,14 @@ const Admin = () => {
             {t('admin.tabs.pages')}
           </Button>
           <Button
+            variant={activeTab === 'homilies' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('homilies')}
+            size="sm"
+          >
+            <Headphones size={16} />
+            {t('admin.tabs.homilies', 'Homélies')}
+          </Button>
+          <Button
             variant={activeTab === 'team' ? 'default' : 'outline'}
             onClick={() => setActiveTab('team')}
             size="sm"
@@ -292,7 +301,7 @@ const Admin = () => {
             size="sm"
           >
             <Heart size={16} />
-            Étapes de vie
+            {t('admin.tabs.lifeStages', 'Étapes de vie')}
           </Button>
           {isAdmin && (
             <Button
@@ -311,7 +320,7 @@ const Admin = () => {
               size="sm"
             >
               <Lock size={16} />
-              {t('admin.tabs.docsPassword', 'Docs Équipes')}
+              {t('admin.tabs.docsPassword', 'Docs équipes')}
             </Button>
           )}
         </div>
@@ -319,6 +328,7 @@ const Admin = () => {
         <div className="card-parish overflow-hidden">
           {activeTab === 'articles' && <AdminArticles key={`articles-${refreshKey}`} />}
           {activeTab === 'pages' && <AdminPages key={`pages-${refreshKey}`} />}
+          {activeTab === 'homilies' && <AdminHomilies key={`homilies-${refreshKey}`} />}
           {activeTab === 'team' && <AdminTeam key={`team-${refreshKey}`} />}
           {activeTab === 'schedules' && <AdminMassSchedules key={`schedules-${refreshKey}`} />}
           {activeTab === 'messages' && <AdminMessages key={`messages-${refreshKey}`} />}

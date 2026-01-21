@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const prisma = require('./db');
@@ -34,6 +35,8 @@ const articleRoutes = require('./routes/articles');
 const teamRoutes = require('./routes/team');
 const scheduleRoutes = require('./routes/schedules');
 const authRoutes = require('./routes/auth');
+const podcastRoutes = require('./routes/podcast');
+const homilyRoutes = require('./routes/homilies');
 const uploadRoutes = require('./routes/uploads');
 
 // Utilisation des routes
@@ -41,6 +44,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/articles', articleRoutes);
 app.use('/api/team', teamRoutes);
 app.use('/api/schedules', scheduleRoutes);
+app.use('/api/homilies', homilyRoutes);
+app.use('/podcast', podcastRoutes);
 app.use('/api/uploads', uploadRoutes);
 
 // Route de test pour vérifier que le serveur répond

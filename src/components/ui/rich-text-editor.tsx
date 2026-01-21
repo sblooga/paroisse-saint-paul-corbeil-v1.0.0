@@ -1,11 +1,12 @@
 import { useEditor, EditorContent } from '@tiptap/react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
 import TextAlign from '@tiptap/extension-text-align';
 import { Button } from './button';
+import { Input } from './input';
 import {
   Bold,
   Italic,
@@ -29,6 +30,12 @@ import {
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+
+interface HomilyOption {
+  id: string;
+  slug: string;
+  title: string;
+}
 
 interface RichTextEditorProps {
   content: string;
@@ -68,6 +75,24 @@ export function RichTextEditor({
   className,
 }: RichTextEditorProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const fetchedHomilies = useRef(false);
+  const [homilies, setHomilies] = useState<HomilyOption[]>([]);
+  const [homilyFilter, setHomilyFilter] = useState('');
+  const [selectedHomily, setSelectedHomily] = useState<string>('');
+  const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:10000/api').replace(/\/$/, '');
+  const baseHost = apiBase.replace(/\/api$/, '');
+
+  const filteredHomilies = useMemo(() => {
+    const seen = new Set<string>();
+    return homilies
+      .filter((h) => {
+        if (seen.has(h.slug)) return false;
+        seen.add(h.slug);
+        const q = homilyFilter.toLowerCase();
+        return !q || h.slug.toLowerCase().includes(q) || h.title.toLowerCase().includes(q);
+      })
+      .slice(0, 100);
+  }, [homilies, homilyFilter]);
 
   const CustomImage = Image.extend({
     addAttributes() {
@@ -129,6 +154,35 @@ export function RichTextEditor({
       editor.commands.setContent(content);
     }
   }, [content, editor]);
+
+  // Chargement des homélies disponibles pour insertion rapide
+  useEffect(() => {
+    if (fetchedHomilies.current) return;
+    fetchedHomilies.current = true;
+    fetch(`${baseHost}/podcast`)
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data: HomilyOption[]) => {
+        const list = (data || []).map((h) => ({
+          ...h,
+          slug: (h.slug || '').trim(),
+          title: (h.title || '').trim()
+        }));
+        const uniqMap = new Map<string, HomilyOption>();
+        for (const h of list) {
+          const key = h.slug.toLowerCase();
+          if (!uniqMap.has(key)) {
+            uniqMap.set(key, h);
+          }
+        }
+        const uniq = Array.from(uniqMap.values());
+        setHomilies(uniq);
+        if (uniq.length > 0 && !selectedHomily) {
+          setSelectedHomily(uniq[0].slug);
+        }
+      })
+      .catch(() => setHomilies([]));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [baseHost]);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -260,6 +314,33 @@ export function RichTextEditor({
       .run();
   };
 
+  const insertHomilyWithSlug = (slug: string) => {
+    if (!editor) return;
+    editor
+      .chain()
+      .focus()
+      .insertContent(
+        `<audio class="my-4 w-full" controls preload="none"><source src="${baseHost}/podcast/${slug}" type="audio/mpeg" />Votre navigateur ne supporte pas l'audio.</audio>`
+      )
+      .run();
+  };
+
+  const insertHomily = () => {
+    if (!editor) return;
+    if (homilies.length === 0) {
+      toast('Aucune homélie disponible. Ajoutez-en d\'abord dans l’onglet Homélies.');
+      return;
+    }
+    if (selectedHomily) {
+      insertHomilyWithSlug(selectedHomily);
+      return;
+    }
+    // fallback prompt si rien de sélectionné
+    const choices = homilies.map((h) => `${h.slug} (${h.title})`).join(', ');
+    const slug = window.prompt(`Choisissez un slug d'homélie (disponibles: ${choices})`, homilies[0]?.slug);
+    if (slug) insertHomilyWithSlug(slug);
+  };
+
   return (
     <div className={cn('border rounded-md bg-background', className)}>
       <style>{`.ProseMirror-selectednode { outline: 2px solid #2563eb; }`}</style>
@@ -339,9 +420,31 @@ export function RichTextEditor({
         <Button type="button" variant="ghost" size="sm" onClick={() => insertEmbed('video (YouTube, Vimeo, etc.)')}>
           <Play className="h-4 w-4" />
         </Button>
-        <Button type="button" variant="ghost" size="sm" onClick={() => insertEmbed('podcast')}>
-          <FileAudio className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button type="button" variant="ghost" size="sm" onClick={insertHomily} title="Insérer l'homélie sélectionnée">
+            <FileAudio className="h-4 w-4" />
+          </Button>
+          <Input
+            placeholder="Filtrer..."
+            className="h-8 w-28"
+            value={homilyFilter}
+            onChange={(e) => setHomilyFilter(e.target.value)}
+          />
+          <select
+            className="h-8 text-sm border rounded px-2"
+            value={selectedHomily}
+            onChange={(e) => setSelectedHomily(e.target.value)}
+          >
+            {filteredHomilies.map((h) => {
+              const label = h.title === h.slug ? h.slug : `${h.title} (${h.slug})`;
+              return (
+                <option key={h.slug} value={h.slug}>
+                  {label}
+                </option>
+              );
+            })}
+          </select>
+        </div>
         <Button type="button" variant="ghost" size="sm" onClick={() => insertEmbed('fichier (Google Drive, PDF integre)')}>
           <FileDown className="h-4 w-4" />
         </Button>
@@ -357,3 +460,4 @@ export function RichTextEditor({
     </div>
   );
 }
+

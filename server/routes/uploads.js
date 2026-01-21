@@ -16,7 +16,8 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-const storage = new CloudinaryStorage({
+// Stockage pour les images
+const storageImages = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => ({
     folder: process.env.CLOUDINARY_FOLDER || 'paroisse-saint-paul',
@@ -26,10 +27,20 @@ const storage = new CloudinaryStorage({
   })
 });
 
-const upload = multer({ storage });
+// Stockage pour les audios (MP3 recommandé)
+const storageAudio = new CloudinaryStorage({
+  cloudinary,
+  params: async () => ({
+    folder: process.env.CLOUDINARY_AUDIO_FOLDER || 'paroisse-saint-paul/homilies',
+    resource_type: 'auto'
+  })
+});
+
+const uploadImages = multer({ storage: storageImages });
+const uploadAudio = multer({ storage: storageAudio });
 
 // Upload d'une image
-router.post('/', requireAuth, requireRole('ADMIN'), upload.single('file'), (req, res) => {
+router.post('/', requireAuth, requireRole('ADMIN'), uploadImages.single('file'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: 'Aucun fichier reçu' });
   }
@@ -39,7 +50,19 @@ router.post('/', requireAuth, requireRole('ADMIN'), upload.single('file'), (req,
   });
 });
 
-// Suppression d'une image par publicId
+// Upload d'un audio (retourne publicId utilisable dans une homélie)
+router.post('/audio', requireAuth, requireRole('ADMIN'), uploadAudio.single('file'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'Aucun fichier reçu' });
+  }
+  res.status(201).json({
+    url: req.file.path,
+    publicId: req.file.filename,
+    resourceType: req.file.resource_type || 'auto'
+  });
+});
+
+// Suppression d'un fichier par publicId (images par défaut)
 router.delete('/:publicId', requireAuth, requireRole('ADMIN'), async (req, res) => {
   try {
     const result = await cloudinary.uploader.destroy(req.params.publicId);

@@ -82,3 +82,12 @@ model SiteSettings {
   value     String
   updatedAt DateTime @updatedAt
 }
+
+model Homily {
+  id                   String   @id @default(uuid())
+  slug                 String   @unique
+  title                String
+  cloudinaryPublicId   String
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
