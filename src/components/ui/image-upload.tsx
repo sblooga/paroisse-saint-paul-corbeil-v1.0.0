@@ -1,6 +1,5 @@
 import { useState, useRef } from 'react';
 import { Upload, X, Loader2 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from './button';
 import { cn } from '@/lib/utils';
 
@@ -25,36 +24,24 @@ async function compressImage(
     const img = new Image();
     img.onload = () => {
       let { width, height } = img;
-
-      // Calculate new dimensions maintaining aspect ratio
       if (width > maxWidth || height > maxHeight) {
         const ratio = Math.min(maxWidth / width, maxHeight / height);
         width = Math.round(width * ratio);
         height = Math.round(height * ratio);
       }
-
-      // Create canvas and draw resized image
       const canvas = document.createElement('canvas');
       canvas.width = width;
       canvas.height = height;
       const ctx = canvas.getContext('2d');
-      
       if (!ctx) {
         reject(new Error('Could not get canvas context'));
         return;
       }
-
       ctx.drawImage(img, 0, 0, width, height);
-
-      // Convert to blob with compression
       canvas.toBlob(
         (blob) => {
-          if (blob) {
-            console.log(`Image compressed: ${(file.size / 1024).toFixed(1)}KB → ${(blob.size / 1024).toFixed(1)}KB`);
-            resolve(blob);
-          } else {
-            reject(new Error('Failed to compress image'));
-          }
+          if (blob) resolve(blob);
+          else reject(new Error('Failed to compress image'));
         },
         'image/webp',
         quality
@@ -65,10 +52,10 @@ async function compressImage(
   });
 }
 
-export function ImageUpload({ 
-  value, 
-  onChange, 
-  folder = 'uploads', 
+export function ImageUpload({
+  value,
+  onChange,
+  folder = 'uploads',
   className,
   maxWidth = 1200,
   maxHeight = 630,
@@ -82,14 +69,11 @@ export function ImageUpload({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
     if (!validTypes.includes(file.type)) {
       setError('Format non supporté. Utilisez JPG, PNG, WebP ou GIF.');
       return;
     }
-
-    // Validate file size (5MB)
     if (file.size > 5 * 1024 * 1024) {
       setError('Image trop volumineuse. Maximum 5MB.');
       return;
@@ -99,39 +83,34 @@ export function ImageUpload({
     setUploading(true);
 
     try {
-      // Compress image (skip for GIFs to preserve animation)
       let imageToUpload: Blob = file;
       let fileExt = 'webp';
-      
       if (file.type !== 'image/gif') {
         imageToUpload = await compressImage(file, maxWidth, maxHeight, quality);
       } else {
         fileExt = 'gif';
       }
 
+      const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:10000/api').replace(/\/$/, '');
+      const token = localStorage.getItem('backend_jwt') || '';
+      const fd = new FormData();
       const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      fd.append('file', imageToUpload, fileName);
 
-      const { error: uploadError } = await supabase.storage
-        .from('media')
-        .upload(fileName, imageToUpload, {
-          contentType: file.type === 'image/gif' ? 'image/gif' : 'image/webp'
-        });
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('media')
-        .getPublicUrl(fileName);
-
-      onChange(publicUrl);
+      const res = await fetch(`${apiBase}/uploads`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: fd
+      });
+      if (!res.ok) throw new Error('Upload échoué');
+      const data = await res.json();
+      onChange(data.url);
     } catch (err: any) {
       console.error('Upload error:', err);
       setError(err.message || 'Erreur lors du téléchargement');
     } finally {
       setUploading(false);
-      if (inputRef.current) {
-        inputRef.current.value = '';
-      }
+      if (inputRef.current) inputRef.current.value = '';
     }
   };
 
@@ -190,9 +169,7 @@ export function ImageUpload({
         </Button>
       )}
 
-      {error && (
-        <p className="text-sm text-destructive">{error}</p>
-      )}
+      {error && <p className="text-sm text-destructive">{error}</p>}
     </div>
   );
 }

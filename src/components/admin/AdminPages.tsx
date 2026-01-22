@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Eye, EyeOff, Save, X } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -16,14 +15,11 @@ import {
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useBackendAuth } from '@/hooks/useBackendAuth';
 
 interface Page {
   id: string;
-  title: string;
   slug: string;
-  content: string | null;
-  meta_title: string | null;
-  meta_description: string | null;
   title_fr: string | null;
   title_pl: string | null;
   content_fr: string | null;
@@ -33,22 +29,21 @@ interface Page {
   meta_description_fr: string | null;
   meta_description_pl: string | null;
   published: boolean;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 const AdminPages = () => {
   const { toast } = useToast();
+  const { token } = useBackendAuth();
+  const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:10000/api').replace(/\/$/, '');
+
   const [pages, setPages] = useState<Page[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPage, setEditingPage] = useState<Page | null>(null);
   const [formData, setFormData] = useState({
-    title: '',
     slug: '',
-    content: '',
-    meta_title: '',
-    meta_description: '',
     title_fr: '',
     title_pl: '',
     content_fr: '',
@@ -60,20 +55,29 @@ const AdminPages = () => {
     published: true,
   });
 
+  const headersAuth = (): Record<string, string> => {
+    const h: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) h.Authorization = `Bearer ${token}`;
+    return h;
+  };
+
   useEffect(() => {
     fetchPages();
   }, []);
 
   const fetchPages = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('pages')
-      .select('*')
-      .order('title');
-    
-    if (data) setPages(data as Page[]);
-    if (error) console.error('Error fetching pages:', error);
-    setLoading(false);
+    try {
+      const res = await fetch(`${apiBase}/pages/all`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+      if (!res.ok) throw new Error('Chargement impossible');
+      const data = await res.json();
+      setPages(data as Page[]);
+    } catch (error) {
+      console.error('Error fetching pages:', error);
+      toast({ title: 'Erreur', description: 'Impossible de charger les pages', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const generateSlug = (title: string) => {
@@ -90,7 +94,6 @@ const AdminPages = () => {
       setFormData(prev => ({
         ...prev,
         title_fr: title,
-        title: title,
         slug: editingPage ? prev.slug : generateSlug(title),
         meta_title_fr: editingPage ? prev.meta_title_fr : title,
       }));
@@ -105,11 +108,7 @@ const AdminPages = () => {
 
   const resetForm = () => {
     setFormData({
-      title: '',
       slug: '',
-      content: '',
-      meta_title: '',
-      meta_description: '',
       title_fr: '',
       title_pl: '',
       content_fr: '',
@@ -126,18 +125,14 @@ const AdminPages = () => {
   const openEditDialog = (page: Page) => {
     setEditingPage(page);
     setFormData({
-      title: page.title,
       slug: page.slug,
-      content: page.content || '',
-      meta_title: page.meta_title || '',
-      meta_description: page.meta_description || '',
-      title_fr: page.title_fr || page.title || '',
+      title_fr: page.title_fr || '',
       title_pl: page.title_pl || '',
-      content_fr: page.content_fr || page.content || '',
+      content_fr: page.content_fr || '',
       content_pl: page.content_pl || '',
-      meta_title_fr: page.meta_title_fr || page.meta_title || '',
+      meta_title_fr: page.meta_title_fr || '',
       meta_title_pl: page.meta_title_pl || '',
-      meta_description_fr: page.meta_description_fr || page.meta_description || '',
+      meta_description_fr: page.meta_description_fr || '',
       meta_description_pl: page.meta_description_pl || '',
       published: page.published,
     });
@@ -153,11 +148,7 @@ const AdminPages = () => {
     }
 
     const dataToSend = {
-      title: formData.title_fr,
       slug: formData.slug,
-      content: formData.content_fr,
-      meta_title: formData.meta_title_fr,
-      meta_description: formData.meta_description_fr,
       title_fr: formData.title_fr,
       title_pl: formData.title_pl || null,
       content_fr: formData.content_fr || null,
@@ -169,61 +160,58 @@ const AdminPages = () => {
       published: formData.published,
     };
 
-    if (editingPage) {
-      const { error } = await supabase
-        .from('pages')
-        .update(dataToSend)
-        .eq('id', editingPage.id);
-      
-      if (error) {
-        toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
-      } else {
-        toast({ title: 'Page mise à jour' });
-        fetchPages();
-        setDialogOpen(false);
-        resetForm();
-      }
-    } else {
-      const { error } = await supabase
-        .from('pages')
-        .insert([dataToSend]);
-      
-      if (error) {
-        toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
-      } else {
-        toast({ title: 'Page créée' });
-        fetchPages();
-        setDialogOpen(false);
-        resetForm();
-      }
+    const method = editingPage ? 'PUT' : 'POST';
+    const url = editingPage ? `${apiBase}/pages/${editingPage.id}` : `${apiBase}/pages`;
+
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: headersAuth(),
+        body: JSON.stringify(dataToSend),
+      });
+      if (!res.ok) throw new Error('Enregistrement impossible');
+      toast({ title: editingPage ? 'Page mise à jour' : 'Page créée' });
+      fetchPages();
+      setDialogOpen(false);
+      resetForm();
+    } catch (err: any) {
+      toast({ title: 'Erreur', description: err.message || 'Enregistrement impossible', variant: 'destructive' });
     }
   };
 
   const togglePublished = async (id: string, currentStatus: boolean) => {
-    const { error } = await supabase
-      .from('pages')
-      .update({ published: !currentStatus })
-      .eq('id', id);
-    
-    if (!error) {
-      setPages(prev => prev.map(p => p.id === id ? { ...p, published: !currentStatus } : p));
-      toast({ title: currentStatus ? 'Page dépubliée' : 'Page publiée' });
+    try {
+      const res = await fetch(`${apiBase}/pages/${id}`, {
+        method: 'PUT',
+        headers: headersAuth(),
+        body: JSON.stringify({ published: !currentStatus }),
+      });
+      if (res.ok) {
+        setPages(prev => prev.map(p => p.id === id ? { ...p, published: !currentStatus } : p));
+        toast({ title: currentStatus ? 'Page dépubliée' : 'Page publiée' });
+      } else {
+        throw new Error('Impossible de mettre à jour');
+      }
+    } catch (error: any) {
+      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     }
   };
 
   const deletePage = async (id: string) => {
     if (!confirm('Supprimer cette page ?')) return;
-    
-    const { error } = await supabase
-      .from('pages')
-      .delete()
-      .eq('id', id);
-    
-    if (!error) {
-      setPages(prev => prev.filter(p => p.id !== id));
-      toast({ title: 'Page supprimée' });
-    } else {
-      toast({ title: 'Erreur', description: 'Impossible de supprimer', variant: 'destructive' });
+    try {
+      const res = await fetch(`${apiBase}/pages/${id}`, {
+        method: 'DELETE',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (res.ok) {
+        setPages(prev => prev.filter(p => p.id !== id));
+        toast({ title: 'Page supprimée' });
+      } else {
+        throw new Error('Impossible de supprimer');
+      }
+    } catch (error: any) {
+      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     }
   };
 
@@ -327,7 +315,7 @@ const AdminPages = () => {
                       id="title_pl"
                       value={formData.title_pl}
                       onChange={(e) => handleTitleChange(e.target.value, 'pl')}
-                      placeholder="Tytuł strony po polsku"
+                      placeholder="Tytul strony po polsku"
                     />
                   </div>
                   <div className="space-y-2">
@@ -335,7 +323,7 @@ const AdminPages = () => {
                     <RichTextEditor
                       content={formData.content_pl}
                       onChange={(content) => setFormData(prev => ({ ...prev, content_pl: content }))}
-                      placeholder="Treść strony po polsku..."
+                      placeholder="Tresc strony po polsku..."
                     />
                   </div>
                   <div className="border-t pt-4 mt-4">
@@ -347,7 +335,7 @@ const AdminPages = () => {
                           id="meta_title_pl"
                           value={formData.meta_title_pl}
                           onChange={(e) => setFormData(prev => ({ ...prev, meta_title_pl: e.target.value }))}
-                          placeholder="Tytuł dla wyszukiwarek"
+                          placeholder="Tytul dla wyszukiwarek"
                           maxLength={60}
                         />
                         <p className="text-xs text-muted-foreground">{formData.meta_title_pl.length}/60 znaków</p>
@@ -417,7 +405,7 @@ const AdminPages = () => {
             ) : (
               pages.map((page) => (
                 <TableRow key={page.id}>
-                  <TableCell className="font-medium">{page.title_fr || page.title}</TableCell>
+                  <TableCell className="font-medium">{page.title_fr || page.slug}</TableCell>
                   <TableCell>
                     <div className="flex gap-1">
                       {page.title_fr && <Badge variant="outline">FR</Badge>}
@@ -432,7 +420,7 @@ const AdminPages = () => {
                       <Badge variant="secondary">Brouillon</Badge>
                     )}
                   </TableCell>
-                  <TableCell className="text-sm">{formatDate(page.updated_at)}</TableCell>
+                  <TableCell className="text-sm">{formatDate(page.updatedAt)}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                       <Button size="sm" variant="outline" onClick={() => togglePublished(page.id, page.published)}>

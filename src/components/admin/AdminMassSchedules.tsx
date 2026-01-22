@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Save, X } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -18,12 +17,13 @@ import {
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useBackendAuth } from '@/hooks/useBackendAuth';
 
 interface MassSchedule {
   id: string;
-  day_of_week: string;
-  day_of_week_fr: string | null;
-  day_of_week_pl: string | null;
+  day_code: string;
+  day_fr: string | null;
+  day_pl: string | null;
   time: string;
   location: string | null;
   location_fr: string | null;
@@ -34,7 +34,7 @@ interface MassSchedule {
   is_special: boolean;
   special_date: string | null;
   active: boolean;
-  sort_order: number;
+  order: number;
   language: string | null;
 }
 
@@ -50,14 +50,17 @@ const DAYS = [
 
 const AdminMassSchedules = () => {
   const { toast } = useToast();
+  const { token } = useBackendAuth();
+  const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:10000/api').replace(/\/$/, '');
+
   const [schedules, setSchedules] = useState<MassSchedule[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState<MassSchedule | null>(null);
   const [formData, setFormData] = useState({
     day_of_week: 'dimanche',
-    day_of_week_fr: '',
-    day_of_week_pl: '',
+    day_fr: '',
+    day_pl: '',
     time: '',
     location: '',
     location_fr: '',
@@ -72,28 +75,36 @@ const AdminMassSchedules = () => {
     language: 'fr',
   });
 
+  const headersAuth = (): Record<string, string> => {
+    const h: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) h.Authorization = `Bearer ${token}`;
+    return h;
+  };
+
   useEffect(() => {
     fetchSchedules();
   }, []);
 
   const fetchSchedules = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('mass_schedules')
-      .select('*')
-      .order('sort_order')
-      .order('day_of_week');
-    
-    if (data) setSchedules(data);
-    if (error) console.error('Error fetching schedules:', error);
-    setLoading(false);
+    try {
+      const res = await fetch(`${apiBase}/schedules/all`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+      if (!res.ok) throw new Error('Chargement impossible');
+      const data = await res.json();
+      setSchedules(data as MassSchedule[]);
+    } catch (error) {
+      console.error('Error fetching schedules:', error);
+      toast({ title: 'Erreur', description: 'Impossible de charger les horaires', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const resetForm = () => {
     setFormData({
       day_of_week: 'dimanche',
-      day_of_week_fr: '',
-      day_of_week_pl: '',
+      day_fr: '',
+      day_pl: '',
       time: '',
       location: '',
       location_fr: '',
@@ -113,9 +124,9 @@ const AdminMassSchedules = () => {
   const openEditDialog = (schedule: MassSchedule) => {
     setEditingSchedule(schedule);
     setFormData({
-      day_of_week: schedule.day_of_week,
-      day_of_week_fr: schedule.day_of_week_fr || '',
-      day_of_week_pl: schedule.day_of_week_pl || '',
+      day_of_week: schedule.day_code,
+      day_fr: schedule.day_fr || '',
+      day_pl: schedule.day_pl || '',
       time: schedule.time,
       location: schedule.location || '',
       location_fr: schedule.location_fr || '',
@@ -124,9 +135,9 @@ const AdminMassSchedules = () => {
       description_fr: schedule.description_fr || '',
       description_pl: schedule.description_pl || '',
       is_special: schedule.is_special,
-      special_date: schedule.special_date || '',
+      special_date: schedule.special_date ? schedule.special_date.slice(0, 10) : '',
       active: schedule.active,
-      sort_order: schedule.sort_order,
+      sort_order: schedule.order,
       language: schedule.language || 'fr',
     });
     setDialogOpen(true);
@@ -134,16 +145,15 @@ const AdminMassSchedules = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!formData.day_of_week || !formData.time) {
       toast({ title: 'Erreur', description: 'Jour et heure requis', variant: 'destructive' });
       return;
     }
 
     const dataToSend = {
-      day_of_week: formData.day_of_week,
-      day_of_week_fr: formData.day_of_week_fr || null,
-      day_of_week_pl: formData.day_of_week_pl || null,
+      day_code: formData.day_of_week,
+      day_fr: formData.day_fr || null,
+      day_pl: formData.day_pl || null,
       time: formData.time,
       location: formData.location || null,
       location_fr: formData.location_fr || null,
@@ -154,65 +164,62 @@ const AdminMassSchedules = () => {
       is_special: formData.is_special,
       special_date: formData.special_date || null,
       active: formData.active,
-      sort_order: formData.sort_order,
+      order: formData.sort_order,
       language: formData.language,
     };
 
-    if (editingSchedule) {
-      const { error } = await supabase
-        .from('mass_schedules')
-        .update(dataToSend)
-        .eq('id', editingSchedule.id);
-      
-      if (error) {
-        toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
-      } else {
-        toast({ title: 'Horaire mis à jour' });
-        fetchSchedules();
-        setDialogOpen(false);
-        resetForm();
-      }
-    } else {
-      const { error } = await supabase
-        .from('mass_schedules')
-        .insert([dataToSend]);
-      
-      if (error) {
-        toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
-      } else {
-        toast({ title: 'Horaire ajouté' });
-        fetchSchedules();
-        setDialogOpen(false);
-        resetForm();
-      }
+    const method = editingSchedule ? 'PUT' : 'POST';
+    const url = editingSchedule ? `${apiBase}/schedules/${editingSchedule.id}` : `${apiBase}/schedules`;
+
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: headersAuth(),
+        body: JSON.stringify(dataToSend),
+      });
+      if (!res.ok) throw new Error('Enregistrement impossible');
+      toast({ title: editingSchedule ? 'Horaire mis à jour' : 'Horaire ajouté' });
+      fetchSchedules();
+      setDialogOpen(false);
+      resetForm();
+    } catch (err: any) {
+      toast({ title: 'Erreur', description: err.message || 'Enregistrement impossible', variant: 'destructive' });
     }
   };
 
   const toggleActive = async (id: string, currentStatus: boolean) => {
-    const { error } = await supabase
-      .from('mass_schedules')
-      .update({ active: !currentStatus })
-      .eq('id', id);
-    
-    if (!error) {
-      setSchedules(prev => prev.map(s => s.id === id ? { ...s, active: !currentStatus } : s));
-      toast({ title: currentStatus ? 'Horaire désactivé' : 'Horaire activé' });
+    try {
+      const res = await fetch(`${apiBase}/schedules/${id}`, {
+        method: 'PUT',
+        headers: headersAuth(),
+        body: JSON.stringify({ active: !currentStatus }),
+      });
+      if (res.ok) {
+        setSchedules(prev => prev.map(s => s.id === id ? { ...s, active: !currentStatus } : s));
+        toast({ title: currentStatus ? 'Horaire désactivé' : 'Horaire activé' });
+      } else {
+        throw new Error('Impossible de mettre à jour');
+      }
+    } catch (error: any) {
+      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     }
   };
 
   const deleteSchedule = async (id: string) => {
     if (!confirm('Supprimer cet horaire ?')) return;
-    
-    const { error } = await supabase
-      .from('mass_schedules')
-      .delete()
-      .eq('id', id);
-    
-    if (!error) {
-      setSchedules(prev => prev.filter(s => s.id !== id));
-      toast({ title: 'Horaire supprimé' });
-    } else {
-      toast({ title: 'Erreur', description: 'Impossible de supprimer', variant: 'destructive' });
+    try {
+      const res = await fetch(`${apiBase}/schedules/${id}`, {
+        method: 'DELETE',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (res.ok) {
+        setSchedules(prev => prev.filter(s => s.id !== id));
+        toast({ title: 'Horaire supprimé' });
+      } else {
+        throw new Error('Impossible de supprimer');
+      }
+    } catch (error: any) {
+      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     }
   };
 
@@ -294,11 +301,11 @@ const AdminMassSchedules = () => {
                 
                 <TabsContent value="fr" className="space-y-4 mt-4">
                   <div className="space-y-2">
-                    <Label htmlFor="day_of_week_fr">Jour (affiché FR)</Label>
+                    <Label htmlFor="day_fr">Jour (affiché FR)</Label>
                     <Input
-                      id="day_of_week_fr"
-                      value={formData.day_of_week_fr}
-                      onChange={(e) => setFormData(prev => ({ ...prev, day_of_week_fr: e.target.value }))}
+                      id="day_fr"
+                      value={formData.day_fr}
+                      onChange={(e) => setFormData(prev => ({ ...prev, day_fr: e.target.value }))}
                       placeholder="Dimanche, En semaine..."
                     />
                   </div>
@@ -325,11 +332,11 @@ const AdminMassSchedules = () => {
                 
                 <TabsContent value="pl" className="space-y-4 mt-4">
                   <div className="space-y-2">
-                    <Label htmlFor="day_of_week_pl">Jour (affiché PL)</Label>
+                    <Label htmlFor="day_pl">Jour (affiché PL)</Label>
                     <Input
-                      id="day_of_week_pl"
-                      value={formData.day_of_week_pl}
-                      onChange={(e) => setFormData(prev => ({ ...prev, day_of_week_pl: e.target.value }))}
+                      id="day_pl"
+                      value={formData.day_pl}
+                      onChange={(e) => setFormData(prev => ({ ...prev, day_pl: e.target.value }))}
                       placeholder="Niedziela, W tygodniu..."
                     />
                   </div>
@@ -436,7 +443,7 @@ const AdminMassSchedules = () => {
               schedules.map((schedule) => (
                 <TableRow key={schedule.id}>
                   <TableCell className="font-medium">
-                    {schedule.day_of_week_fr || getDayLabel(schedule.day_of_week)}
+                    {schedule.day_fr || getDayLabel(schedule.day_code)}
                   </TableCell>
                   <TableCell>{schedule.time}</TableCell>
                   <TableCell>

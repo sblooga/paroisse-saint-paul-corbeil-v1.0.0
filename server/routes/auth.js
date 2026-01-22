@@ -4,12 +4,13 @@ const prisma = require('../db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
+const { requireAuth } = require('../middleware/auth');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
 const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // max attempts per window
+  windowMs: 15 * 60 * 1000,
+  max: 10,
   standardHeaders: true,
   legacyHeaders: false,
   message: { message: 'Trop de tentatives, réessayez plus tard.' }
@@ -30,6 +31,20 @@ router.post('/login', loginLimiter, async (req, res) => {
 
     const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '24h' });
     res.json({ token, user: { email: user.email, role: user.role } });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Profil de l'utilisateur connecté (via JWT)
+router.get('/me', requireAuth, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: { email: true, role: true }
+    });
+    if (!user) return res.status(404).json({ message: 'Utilisateur introuvable' });
+    res.json({ user });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

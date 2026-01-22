@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Save, X, Eye, EyeOff } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -19,75 +18,90 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
+import { useBackendAuth } from '@/hooks/useBackendAuth';
 
 interface LifeStage {
   id: string;
-  title: string;
-  title_fr: string | null;
+  title_fr: string;
   title_pl: string | null;
-  description: string;
-  description_fr: string | null;
+  description_fr: string;
   description_pl: string | null;
-  icon: string;
-  image_url: string | null;
-  sort_order: number;
+  icon: string | null;
+  imageUrl: string | null;
+  sortOrder: number;
   active: boolean;
-  created_at: string;
+  createdAt: string;
 }
 
 const ICON_OPTIONS = [
-  { value: 'Droplets', label: '💧 Baptême' },
-  { value: 'BookOpen', label: '📖 Communion' },
-  { value: 'Flame', label: '🔥 Confirmation' },
-  { value: 'Heart', label: '❤️ Réconciliation' },
-  { value: 'Gem', label: '💎 Mariage' },
-  { value: 'Church', label: '⛪ Vocation' },
-  { value: 'Hand', label: '🙌 Onction' },
-  { value: 'Candle', label: '🕯️ Obsèques' },
-  { value: 'Star', label: '⭐ Autre' },
-  { value: 'Cross', label: '✝️ Croix' },
+  { value: 'Droplets', label: 'Baptême' },
+  { value: 'BookOpen', label: 'Communion' },
+  { value: 'Flame', label: 'Confirmation' },
+  { value: 'Heart', label: 'Réconciliation' },
+  { value: 'Gem', label: 'Mariage' },
+  { value: 'Church', label: 'Vocation' },
+  { value: 'Hand', label: 'Onction' },
+  { value: 'Candle', label: 'Obsèques' },
+  { value: 'Star', label: 'Autre' },
+  { value: 'Cross', label: 'Croix' },
 ];
 
 const AdminLifeStages = () => {
   const { toast } = useToast();
+  const { token } = useBackendAuth();
+  const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:10000/api').replace(/\/$/, '');
+
   const [stages, setStages] = useState<LifeStage[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingStage, setEditingStage] = useState<LifeStage | null>(null);
   const [formData, setFormData] = useState({
-    title: '',
     title_fr: '',
     title_pl: '',
-    description: '',
     description_fr: '',
     description_pl: '',
     icon: 'Heart',
-    image_url: '',
-    sort_order: 0,
+    imageUrl: '',
+    sortOrder: 0,
     active: true,
   });
 
+  const headersAuth = (): Record<string, string> => {
+    const h: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) h.Authorization = `Bearer ${token}`;
+    return h;
+  };
+
   useEffect(() => {
     fetchStages();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchStages = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('life_stages')
-      .select('*')
-      .order('sort_order');
-    
-    if (data) setStages(data);
-    if (error) console.error('Error fetching life stages:', error);
-    setLoading(false);
+    try {
+      const res = await fetch(`${apiBase}/life-stages/all`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+      if (!res.ok) throw new Error('Chargement impossible');
+      const data = await res.json();
+      setStages(data || []);
+    } catch (error) {
+      console.error('Error fetching life stages:', error);
+      toast({ title: 'Erreur', description: 'Impossible de charger les étapes', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const resetForm = () => {
     setFormData({
-      title: '', title_fr: '', title_pl: '',
-      description: '', description_fr: '', description_pl: '',
-      icon: 'Heart', image_url: '', sort_order: 0, active: true,
+      title_fr: '',
+      title_pl: '',
+      description_fr: '',
+      description_pl: '',
+      icon: 'Heart',
+      imageUrl: '',
+      sortOrder: stages.length,
+      active: true,
     });
     setEditingStage(null);
   };
@@ -95,15 +109,13 @@ const AdminLifeStages = () => {
   const openEditDialog = (stage: LifeStage) => {
     setEditingStage(stage);
     setFormData({
-      title: stage.title,
       title_fr: stage.title_fr || '',
       title_pl: stage.title_pl || '',
-      description: stage.description,
       description_fr: stage.description_fr || '',
       description_pl: stage.description_pl || '',
-      icon: stage.icon,
-      image_url: stage.image_url || '',
-      sort_order: stage.sort_order,
+      icon: stage.icon || 'Heart',
+      imageUrl: stage.imageUrl || '',
+      sortOrder: stage.sortOrder ?? 0,
       active: stage.active,
     });
     setDialogOpen(true);
@@ -118,72 +130,62 @@ const AdminLifeStages = () => {
     }
 
     const dataToSend = {
-      title: formData.title_fr,
       title_fr: formData.title_fr,
       title_pl: formData.title_pl || null,
-      description: formData.description_fr,
       description_fr: formData.description_fr,
       description_pl: formData.description_pl || null,
-      icon: formData.icon,
-      image_url: formData.image_url || null,
-      sort_order: formData.sort_order,
+      icon: formData.icon || null,
+      imageUrl: formData.imageUrl || null,
+      sortOrder: formData.sortOrder ?? 0,
       active: formData.active,
     };
 
-    if (editingStage) {
-      const { error } = await supabase
-        .from('life_stages')
-        .update(dataToSend)
-        .eq('id', editingStage.id);
-      
-      if (error) {
-        toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
-      } else {
-        toast({ title: 'Étape mise à jour' });
-        fetchStages();
-        setDialogOpen(false);
-        resetForm();
-      }
-    } else {
-      const { error } = await supabase
-        .from('life_stages')
-        .insert([dataToSend]);
-      
-      if (error) {
-        toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
-      } else {
-        toast({ title: 'Étape créée' });
-        fetchStages();
-        setDialogOpen(false);
-        resetForm();
-      }
+    const method = editingStage ? 'PUT' : 'POST';
+    const url = editingStage ? `${apiBase}/life-stages/${editingStage.id}` : `${apiBase}/life-stages`;
+
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: headersAuth(),
+        body: JSON.stringify(dataToSend),
+      });
+      if (!res.ok) throw new Error('Enregistrement impossible');
+      toast({ title: editingStage ? 'Étape mise à jour' : 'Étape créée' });
+      fetchStages();
+      setDialogOpen(false);
+      resetForm();
+    } catch (error: any) {
+      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     }
   };
 
   const toggleActive = async (id: string, currentStatus: boolean) => {
-    const { error } = await supabase
-      .from('life_stages')
-      .update({ active: !currentStatus })
-      .eq('id', id);
-    
-    if (!error) {
+    try {
+      const res = await fetch(`${apiBase}/life-stages/${id}`, {
+        method: 'PUT',
+        headers: headersAuth(),
+        body: JSON.stringify({ active: !currentStatus }),
+      });
+      if (!res.ok) throw new Error();
       setStages(prev => prev.map(s => s.id === id ? { ...s, active: !currentStatus } : s));
       toast({ title: currentStatus ? 'Étape désactivée' : 'Étape activée' });
+    } catch {
+      toast({ title: 'Erreur', description: 'Impossible de mettre à jour', variant: 'destructive' });
     }
   };
 
   const deleteStage = async (id: string) => {
     if (!confirm('Supprimer cette étape de vie ?')) return;
     
-    const { error } = await supabase
-      .from('life_stages')
-      .delete()
-      .eq('id', id);
-    
-    if (!error) {
+    try {
+      const res = await fetch(`${apiBase}/life-stages/${id}`, {
+        method: 'DELETE',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error();
       setStages(prev => prev.filter(s => s.id !== id));
       toast({ title: 'Étape supprimée' });
-    } else {
+    } catch {
       toast({ title: 'Erreur', description: 'Impossible de supprimer', variant: 'destructive' });
     }
   };
@@ -191,7 +193,7 @@ const AdminLifeStages = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-heading font-semibold">Gestion des Étapes de vie</h2>
+        <h2 className="text-lg font-heading font-semibold">Gestion des étapes de vie</h2>
         <Dialog open={dialogOpen} onOpenChange={(open) => {
           setDialogOpen(open);
           if (!open) resetForm();
@@ -225,8 +227,8 @@ const AdminLifeStages = () => {
                   <Label>Ordre d'affichage</Label>
                   <Input
                     type="number"
-                    value={formData.sort_order}
-                    onChange={(e) => setFormData(prev => ({ ...prev, sort_order: parseInt(e.target.value) || 0 }))}
+                    value={formData.sortOrder}
+                    onChange={(e) => setFormData(prev => ({ ...prev, sortOrder: parseInt(e.target.value) || 0 }))}
                   />
                 </div>
               </div>
@@ -234,8 +236,8 @@ const AdminLifeStages = () => {
               <div className="space-y-2">
                 <Label>Image</Label>
                 <ImageUpload
-                  value={formData.image_url}
-                  onChange={(url) => setFormData(prev => ({ ...prev, image_url: url }))}
+                  value={formData.imageUrl}
+                  onChange={(url) => setFormData(prev => ({ ...prev, imageUrl: url }))}
                   folder="life-stages"
                 />
               </div>
@@ -272,7 +274,7 @@ const AdminLifeStages = () => {
                     <Input
                       value={formData.title_pl}
                       onChange={(e) => setFormData(prev => ({ ...prev, title_pl: e.target.value }))}
-                      placeholder="Ex: Chcę ochrzcić moje dziecko"
+                      placeholder="Ex: Chce ochrzcić moje dziecko"
                     />
                   </div>
                   <div className="space-y-2">
@@ -335,22 +337,22 @@ const AdminLifeStages = () => {
               stages.map((stage) => (
                 <TableRow key={stage.id}>
                   <TableCell>
-                    {stage.image_url ? (
-                      <img src={stage.image_url} alt={stage.title} className="w-16 h-12 object-cover rounded" />
+                    {stage.imageUrl ? (
+                      <img src={stage.imageUrl} alt={stage.title_fr} className="w-16 h-12 object-cover rounded" />
                     ) : (
                       <div className="w-16 h-12 bg-muted rounded flex items-center justify-center text-lg">
-                        {ICON_OPTIONS.find(o => o.value === stage.icon)?.label.split(' ')[0] || '❤️'}
+                        {ICON_OPTIONS.find(o => o.value === stage.icon)?.label ?? '—'}
                       </div>
                     )}
                   </TableCell>
-                  <TableCell className="font-medium max-w-xs truncate">{stage.title_fr || stage.title}</TableCell>
+                  <TableCell className="font-medium max-w-xs truncate">{stage.title_fr}</TableCell>
                   <TableCell>
                     <div className="flex gap-1">
                       {stage.title_fr && <Badge variant="outline">FR</Badge>}
                       {stage.title_pl && <Badge variant="outline">PL</Badge>}
                     </div>
                   </TableCell>
-                  <TableCell>{stage.sort_order}</TableCell>
+                  <TableCell>{stage.sortOrder}</TableCell>
                   <TableCell>
                     <Badge variant={stage.active ? 'default' : 'secondary'}>
                       {stage.active ? 'Active' : 'Inactive'}

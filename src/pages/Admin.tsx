@@ -8,8 +8,7 @@ import {
   Calendar, UsersRound, Newspaper, Link as LinkIcon, ShieldCheck, Lock,
   HelpCircle, Heart, Headphones
 } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { useBackendAuth } from '@/hooks/useBackendAuth';
 import { Button } from '@/components/ui/button';
 import AdminArticles from '@/components/admin/AdminArticles';
 import AdminPages from '@/components/admin/AdminPages';
@@ -36,7 +35,7 @@ interface Stats {
 
 const Admin = () => {
   const { t } = useTranslation();
-  const { user, isLoading, isEditor, isAdmin, signOut } = useAuth();
+  const { user, isLoading, isEditor, isAdmin, signOut, token } = useBackendAuth();
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState<TabType>('articles');
@@ -65,16 +64,22 @@ const Admin = () => {
 
   const fetchStats = async () => {
     try {
+      const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:10000/api').replace(/\/$/, '');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
       const [messagesRes, subscribersRes] = await Promise.all([
-        supabase.from('contact_messages').select('id, read'),
-        supabase.from('newsletter_subscribers').select('id, active'),
+        fetch(`${apiBase}/messages`, { headers }),
+        fetch(`${apiBase}/newsletter`, { headers }),
       ]);
 
+      const messages = messagesRes.ok ? await messagesRes.json() : [];
+      const subscribers = subscribersRes.ok ? await subscribersRes.json() : [];
+
       setStats({
-        messages: messagesRes.data?.length || 0,
-        unread: messagesRes.data?.filter(m => !m.read).length || 0,
-        subscribers: subscribersRes.data?.length || 0,
-        activeSubscribers: subscribersRes.data?.filter(s => s.active).length || 0,
+        messages: messages.length || 0,
+        unread: messages.filter((m: any) => !m.read).length || 0,
+        subscribers: subscribers.length || 0,
+        activeSubscribers: subscribers.filter((s: any) => s.active).length || 0,
       });
     } catch (error) {
       console.error('Error fetching stats:', error);

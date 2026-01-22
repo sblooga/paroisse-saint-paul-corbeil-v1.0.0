@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Eye, EyeOff, Save, X } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -17,38 +16,36 @@ import {
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useBackendAuth } from '@/hooks/useBackendAuth';
 
 interface Article {
   id: string;
-  title: string;
   slug: string;
-  content: string | null;
-  excerpt: string | null;
   title_fr: string | null;
   title_pl: string | null;
   content_fr: string | null;
   content_pl: string | null;
   excerpt_fr: string | null;
   excerpt_pl: string | null;
-  image_url: string | null;
+  imageUrl: string | null;
   category: string | null;
   published: boolean;
   featured: boolean;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 const AdminArticles = () => {
   const { toast } = useToast();
+  const { token } = useBackendAuth();
+  const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:10000/api').replace(/\/$/, '');
+
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [formData, setFormData] = useState({
-    title: '',
     slug: '',
-    content: '',
-    excerpt: '',
     title_fr: '',
     title_pl: '',
     content_fr: '',
@@ -65,16 +62,25 @@ const AdminArticles = () => {
     fetchArticles();
   }, []);
 
+  const authHeaders = (): Record<string, string> => {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers.Authorization = `Bearer ${token}`;
+    return headers;
+  };
+
   const fetchArticles = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('articles')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (data) setArticles(data as Article[]);
-    if (error) console.error('Error fetching articles:', error);
-    setLoading(false);
+    try {
+      const res = await fetch(`${apiBase}/articles/all`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+      if (!res.ok) throw new Error('Chargement impossible');
+      const data = await res.json();
+      setArticles(data as Article[]);
+    } catch (error) {
+      console.error('Error fetching articles:', error);
+      toast({ title: 'Erreur', description: 'Impossible de charger les articles', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const generateSlug = (title: string) => {
@@ -91,7 +97,6 @@ const AdminArticles = () => {
       setFormData(prev => ({
         ...prev,
         title_fr: title,
-        title: title, // Keep main title synced with FR
         slug: editingArticle ? prev.slug : generateSlug(title),
       }));
     } else {
@@ -104,10 +109,7 @@ const AdminArticles = () => {
 
   const resetForm = () => {
     setFormData({
-      title: '',
       slug: '',
-      content: '',
-      excerpt: '',
       title_fr: '',
       title_pl: '',
       content_fr: '',
@@ -125,17 +127,14 @@ const AdminArticles = () => {
   const openEditDialog = (article: Article) => {
     setEditingArticle(article);
     setFormData({
-      title: article.title,
       slug: article.slug,
-      content: article.content || '',
-      excerpt: article.excerpt || '',
-      title_fr: article.title_fr || article.title || '',
+      title_fr: article.title_fr || '',
       title_pl: article.title_pl || '',
-      content_fr: article.content_fr || article.content || '',
+      content_fr: article.content_fr || '',
       content_pl: article.content_pl || '',
-      excerpt_fr: article.excerpt_fr || article.excerpt || '',
+      excerpt_fr: article.excerpt_fr || '',
       excerpt_pl: article.excerpt_pl || '',
-      image_url: article.image_url || '',
+      image_url: article.imageUrl || '',
       category: article.category || '',
       published: article.published,
       featured: article.featured || false,
@@ -152,77 +151,71 @@ const AdminArticles = () => {
     }
 
     const dataToSend = {
-      title: formData.title_fr, // Main title = FR title
       slug: formData.slug,
-      content: formData.content_fr,
-      excerpt: formData.excerpt_fr,
       title_fr: formData.title_fr,
       title_pl: formData.title_pl || null,
       content_fr: formData.content_fr || null,
       content_pl: formData.content_pl || null,
       excerpt_fr: formData.excerpt_fr || null,
       excerpt_pl: formData.excerpt_pl || null,
-      image_url: formData.image_url || null,
+      imageUrl: formData.image_url || null,
       category: formData.category || null,
       published: formData.published,
       featured: formData.featured,
     };
 
-    if (editingArticle) {
-      const { error } = await supabase
-        .from('articles')
-        .update(dataToSend)
-        .eq('id', editingArticle.id);
+    const method = editingArticle ? 'PUT' : 'POST';
+    const url = editingArticle ? `${apiBase}/articles/${editingArticle.id}` : `${apiBase}/articles`;
 
-      if (error) {
-        toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
-      } else {
-        toast({ title: 'Article mis à jour' });
-        fetchArticles();
-        setDialogOpen(false);
-        resetForm();
-      }
-    } else {
-      const { error } = await supabase
-        .from('articles')
-        .insert([dataToSend]);
-
-      if (error) {
-        toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
-      } else {
-        toast({ title: 'Article créé' });
-        fetchArticles();
-        setDialogOpen(false);
-        resetForm();
-      }
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: authHeaders(),
+        body: JSON.stringify(dataToSend),
+      });
+      if (!res.ok) throw new Error('Enregistrement impossible');
+      toast({ title: editingArticle ? 'Article mis à jour' : 'Article créé' });
+      fetchArticles();
+      setDialogOpen(false);
+      resetForm();
+    } catch (err: any) {
+      toast({ title: 'Erreur', description: err.message || 'Enregistrement impossible', variant: 'destructive' });
     }
   };
 
   const togglePublished = async (id: string, currentStatus: boolean) => {
-    const { error } = await supabase
-      .from('articles')
-      .update({ published: !currentStatus })
-      .eq('id', id);
-
-    if (!error) {
-      setArticles(prev => prev.map(a => a.id === id ? { ...a, published: !currentStatus } : a));
-      toast({ title: currentStatus ? 'Article dépublié' : 'Article publié' });
+    try {
+      const res = await fetch(`${apiBase}/articles/${id}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ published: !currentStatus }),
+      });
+      if (res.ok) {
+        setArticles(prev => prev.map(a => a.id === id ? { ...a, published: !currentStatus } : a));
+        toast({ title: currentStatus ? 'Article dépublié' : 'Article publié' });
+      } else {
+        throw new Error('Impossible de mettre à jour');
+      }
+    } catch (error: any) {
+      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     }
   };
 
   const deleteArticle = async (id: string) => {
     if (!confirm('Supprimer cet article ?')) return;
-
-    const { error } = await supabase
-      .from('articles')
-      .delete()
-      .eq('id', id);
-
-    if (!error) {
-      setArticles(prev => prev.filter(a => a.id !== id));
-      toast({ title: 'Article supprimé' });
-    } else {
-      toast({ title: 'Erreur', description: 'Impossible de supprimer', variant: 'destructive' });
+    try {
+      const res = await fetch(`${apiBase}/articles/${id}`, {
+        method: 'DELETE',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (res.ok) {
+        setArticles(prev => prev.filter(a => a.id !== id));
+        toast({ title: 'Article supprimé' });
+      } else {
+        throw new Error('Impossible de supprimer');
+      }
+    } catch (error: any) {
+      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     }
   };
 
@@ -271,7 +264,7 @@ const AdminArticles = () => {
                     id="category"
                     value={formData.category}
                     onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                    placeholder="Actualités, Événements..."
+                    placeholder="Actualités, évènements..."
                   />
                 </div>
               </div>
@@ -328,7 +321,7 @@ const AdminArticles = () => {
                       id="title_pl"
                       value={formData.title_pl}
                       onChange={(e) => handleTitleChange(e.target.value, 'pl')}
-                      placeholder="Tytuł artykułu po polsku"
+                      placeholder="Tytul artykulu po polsku"
                     />
                   </div>
                   <div className="space-y-2">
@@ -337,7 +330,7 @@ const AdminArticles = () => {
                       id="excerpt_pl"
                       value={formData.excerpt_pl}
                       onChange={(e) => setFormData(prev => ({ ...prev, excerpt_pl: e.target.value }))}
-                      placeholder="Krótkie podsumowanie po polsku..."
+                      placeholder="Krótki opis po polsku..."
                       rows={2}
                     />
                   </div>
@@ -346,7 +339,7 @@ const AdminArticles = () => {
                     <RichTextEditor
                       content={formData.content_pl}
                       onChange={(content) => setFormData(prev => ({ ...prev, content_pl: content }))}
-                      placeholder="Treść artykułu po polsku..."
+                      placeholder="Tresc artykulu po polsku..."
                     />
                   </div>
                 </TabsContent>
@@ -368,7 +361,7 @@ const AdminArticles = () => {
                     onCheckedChange={(checked) => setFormData(prev => ({ ...prev, featured: checked }))}
                   />
                   <Label htmlFor="featured" className="flex items-center gap-1">
-                    ⭐ Mettre à la une
+                    ★ Mettre à la une
                   </Label>
                 </div>
               </div>
@@ -413,7 +406,7 @@ const AdminArticles = () => {
             ) : (
               articles.map((article) => (
                 <TableRow key={article.id}>
-                  <TableCell className="font-medium">{article.title_fr || article.title}</TableCell>
+                  <TableCell className="font-medium">{article.title_fr || article.slug}</TableCell>
                   <TableCell>
                     <div className="flex gap-1">
                       {article.title_fr && <Badge variant="outline">FR</Badge>}
@@ -430,10 +423,10 @@ const AdminArticles = () => {
                   </TableCell>
                   <TableCell>
                     {article.featured && (
-                      <Badge variant="outline" className="border-primary text-primary">⭐</Badge>
+                      <Badge variant="outline" className="border-primary text-primary">★</Badge>
                     )}
                   </TableCell>
-                  <TableCell className="text-sm">{formatDate(article.created_at)}</TableCell>
+                  <TableCell className="text-sm">{formatDate(article.createdAt)}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                       <Button size="sm" variant="outline" onClick={() => togglePublished(article.id, article.published)}>

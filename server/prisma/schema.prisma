@@ -40,26 +40,37 @@ model Article {
 
 model TeamMember {
   id        String   @id @default(uuid())
-  name      String
-  role_fr   String
-  role_pl   String?
-  photoUrl  String?
-  email     String?
-  whatsapp  String?
-  category  String
-  order     Int      @default(0)
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  name       String
+  role_fr    String
+  role_pl    String?
+  photoUrl   String?
+  email      String?
+  whatsapp   String?
+  category   String
+  order      Int      @default(0)
+  active     Boolean  @default(true)
+  community  String?  @default("fr")
+  bio_fr     String?
+  bio_pl     String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model MassSchedule {
   id          String   @id @default(uuid())
-  day_fr      String
+  day_code    String   @default("dimanche") // code système (lundi, mardi, etc.)
+  day_fr      String?
   day_pl      String?
   time        String
   location    String?
+  location_fr String?
+  location_pl String?
   description String?
+  description_fr String?
+  description_pl String?
+  is_special  Boolean  @default(false)
+  special_date DateTime?
+  language    String?  @default("fr")
   order       Int      @default(0)
   active      Boolean  @default(true)
   createdAt   DateTime @default(now())
@@ -76,6 +87,14 @@ model ContactMessage {
   createdAt DateTime @default(now())
 }
 
+model NewsletterSubscriber {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model SiteSettings {
   id        String   @id @default("main")
   key       String   @unique
@@ -90,4 +109,71 @@ model Homily {
   cloudinaryPublicId   String
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
+}
+
+model Page {
+  id                  String   @id @default(uuid())
+  slug                String   @unique
+  title_fr            String
+  title_pl            String?
+  content_fr          String?
+  content_pl          String?
+  meta_title_fr       String?
+  meta_title_pl       String?
+  meta_description_fr String?
+  meta_description_pl String?
+  published           Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model FaqCategory {
+  id        String   @id @default(uuid())
+  name      String
+  sort_order Int     @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  items     FaqItem[]
+}
+
+model FaqItem {
+  id          String   @id @default(uuid())
+  question_fr String
+  question_pl String?
+  answer_fr   String?
+  answer_pl   String?
+  categoryId  String
+  sort_order  Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category FaqCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+}
+
+model FooterLink {
+  id           String   @id @default(uuid())
+  label        String
+  label_fr     String?
+  label_pl     String?
+  url          String
+  sortOrder    Int      @default(0)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model LifeStage {
+  id               String   @id @default(uuid())
+  title_fr         String
+  title_pl         String?
+  description_fr   String
+  description_pl   String?
+  icon             String?
+  imageUrl         String?
+  sortOrder        Int      @default(0)
+  active           Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }

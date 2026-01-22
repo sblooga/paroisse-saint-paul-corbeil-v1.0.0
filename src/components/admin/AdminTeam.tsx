@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Save, X } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,32 +12,26 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useBackendAuth } from '@/hooks/useBackendAuth';
 
 interface TeamMember {
   id: string;
   name: string;
-  role: string;
-  category: string;
-  photo_url: string | null;
-  email: string | null;
-  phone: string | null;
-  bio: string | null;
-  name_fr: string | null;
-  name_pl: string | null;
-  role_fr: string | null;
+  role_fr: string;
   role_pl: string | null;
+  category: string;
+  photoUrl: string | null;
+  email: string | null;
+  whatsapp: string | null;
   bio_fr: string | null;
   bio_pl: string | null;
-  sort_order: number;
+  order: number;
   active: boolean;
   community: string | null;
-  created_at: string;
 }
 
 const CATEGORIES = [
@@ -51,22 +44,22 @@ const CATEGORIES = [
 
 const AdminTeam = () => {
   const { toast } = useToast();
+  const { token } = useBackendAuth();
+  const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:10000/api').replace(/\/$/, '');
+
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [formData, setFormData] = useState({
-    name: '',
-    role: '',
-    category: 'team',
-    photo_url: '',
-    email: '',
-    phone: '',
-    bio: '',
     name_fr: '',
     name_pl: '',
     role_fr: '',
     role_pl: '',
+    category: 'team',
+    photo_url: '',
+    email: '',
+    phone: '',
     bio_fr: '',
     bio_pl: '',
     sort_order: 0,
@@ -74,36 +67,41 @@ const AdminTeam = () => {
     community: 'fr',
   });
 
+  const authHeaders = (): Record<string, string> => {
+    const h: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) h.Authorization = `Bearer ${token}`;
+    return h;
+  };
+
   useEffect(() => {
     fetchMembers();
   }, []);
 
   const fetchMembers = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('team_members')
-      .select('*')
-      .order('category')
-      .order('sort_order');
-    
-    if (data) setMembers(data as TeamMember[]);
-    if (error) console.error('Error fetching team members:', error);
-    setLoading(false);
+    try {
+      const res = await fetch(`${apiBase}/team/all`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+      if (!res.ok) throw new Error('Chargement impossible');
+      const data = await res.json();
+      setMembers(data as TeamMember[]);
+    } catch (error) {
+      console.error('Error fetching team members:', error);
+      toast({ title: 'Erreur', description: 'Impossible de charger les membres', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const resetForm = () => {
     setFormData({
-      name: '',
-      role: '',
-      category: 'team',
-      photo_url: '',
-      email: '',
-      phone: '',
-      bio: '',
       name_fr: '',
       name_pl: '',
       role_fr: '',
       role_pl: '',
+      category: 'team',
+      photo_url: '',
+      email: '',
+      phone: '',
       bio_fr: '',
       bio_pl: '',
       sort_order: 0,
@@ -116,20 +114,17 @@ const AdminTeam = () => {
   const openEditDialog = (member: TeamMember) => {
     setEditingMember(member);
     setFormData({
-      name: member.name,
-      role: member.role,
-      category: member.category,
-      photo_url: member.photo_url || '',
-      email: member.email || '',
-      phone: member.phone || '',
-      bio: member.bio || '',
-      name_fr: member.name_fr || member.name || '',
-      name_pl: member.name_pl || '',
-      role_fr: member.role_fr || member.role || '',
+      name_fr: member.name || '',
+      name_pl: '',
+      role_fr: member.role_fr || '',
       role_pl: member.role_pl || '',
-      bio_fr: member.bio_fr || member.bio || '',
+      category: member.category,
+      photo_url: member.photoUrl || '',
+      email: member.email || '',
+      phone: member.whatsapp || '',
+      bio_fr: member.bio_fr || '',
       bio_pl: member.bio_pl || '',
-      sort_order: member.sort_order,
+      sort_order: member.order || 0,
       active: member.active,
       community: member.community || 'fr',
     });
@@ -138,7 +133,6 @@ const AdminTeam = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!formData.name_fr || !formData.role_fr || !formData.category) {
       toast({ title: 'Erreur', description: 'Nom (FR), fonction (FR) et catégorie requis', variant: 'destructive' });
       return;
@@ -146,93 +140,81 @@ const AdminTeam = () => {
 
     const dataToSend = {
       name: formData.name_fr,
-      role: formData.role_fr,
-      category: formData.category,
-      photo_url: formData.photo_url || null,
-      email: formData.email || null,
-      phone: formData.phone || null,
-      bio: formData.bio_fr || null,
-      name_fr: formData.name_fr,
-      name_pl: formData.name_pl || null,
       role_fr: formData.role_fr,
       role_pl: formData.role_pl || null,
+      category: formData.category,
+      photoUrl: formData.photo_url || null,
+      email: formData.email || null,
+      whatsapp: formData.phone || null,
       bio_fr: formData.bio_fr || null,
       bio_pl: formData.bio_pl || null,
-      sort_order: formData.sort_order,
+      order: formData.sort_order,
       active: formData.active,
       community: formData.community,
     };
 
-    if (editingMember) {
-      const { error } = await supabase
-        .from('team_members')
-        .update(dataToSend)
-        .eq('id', editingMember.id);
-      
-      if (error) {
-        toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
-      } else {
-        toast({ title: 'Membre mis à jour' });
-        fetchMembers();
-        setDialogOpen(false);
-        resetForm();
-      }
-    } else {
-      const { error } = await supabase
-        .from('team_members')
-        .insert([dataToSend]);
-      
-      if (error) {
-        toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
-      } else {
-        toast({ title: 'Membre ajouté' });
-        fetchMembers();
-        setDialogOpen(false);
-        resetForm();
-      }
+    const method = editingMember ? 'PUT' : 'POST';
+    const url = editingMember ? `${apiBase}/team/${editingMember.id}` : `${apiBase}/team`;
+
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: authHeaders(),
+        body: JSON.stringify(dataToSend),
+      });
+      if (!res.ok) throw new Error('Enregistrement impossible');
+      toast({ title: editingMember ? 'Membre mis à jour' : 'Membre ajouté' });
+      fetchMembers();
+      setDialogOpen(false);
+      resetForm();
+    } catch (err: any) {
+      toast({ title: 'Erreur', description: err.message || 'Enregistrement impossible', variant: 'destructive' });
     }
   };
 
   const toggleActive = async (id: string, currentStatus: boolean) => {
-    const { error } = await supabase
-      .from('team_members')
-      .update({ active: !currentStatus })
-      .eq('id', id);
-    
-    if (!error) {
-      setMembers(prev => prev.map(m => m.id === id ? { ...m, active: !currentStatus } : m));
-      toast({ title: currentStatus ? 'Membre désactivé' : 'Membre activé' });
+    try {
+      const res = await fetch(`${apiBase}/team/${id}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ active: !currentStatus }),
+      });
+      if (res.ok) {
+        setMembers(prev => prev.map(m => m.id === id ? { ...m, active: !currentStatus } : m));
+        toast({ title: currentStatus ? 'Membre désactivé' : 'Membre activé' });
+      } else {
+        throw new Error('Impossible de mettre à jour');
+      }
+    } catch (error: any) {
+      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     }
   };
 
   const deleteMember = async (id: string) => {
     if (!confirm('Supprimer ce membre ?')) return;
-    
-    const { error } = await supabase
-      .from('team_members')
-      .delete()
-      .eq('id', id);
-    
-    if (!error) {
-      setMembers(prev => prev.filter(m => m.id !== id));
-      toast({ title: 'Membre supprimé' });
-    } else {
-      toast({ title: 'Erreur', description: 'Impossible de supprimer', variant: 'destructive' });
+    try {
+      const res = await fetch(`${apiBase}/team/${id}`, {
+        method: 'DELETE',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (res.ok) {
+        setMembers(prev => prev.filter(m => m.id !== id));
+        toast({ title: 'Membre supprimé' });
+      } else {
+        throw new Error('Impossible de supprimer');
+      }
+    } catch (error: any) {
+      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     }
   };
 
-  const getCategoryLabel = (value: string) => {
-    return CATEGORIES.find(c => c.value === value)?.label || value;
-  };
+  const getCategoryLabel = (value: string) => CATEGORIES.find(c => c.value === value)?.label || value;
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-lg font-heading font-semibold">Gestion de l'équipe</h2>
-        <Dialog open={dialogOpen} onOpenChange={(open) => {
-          setDialogOpen(open);
-          if (!open) resetForm();
-        }}>
+        <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
             <Button>
               <Plus size={18} />
@@ -445,21 +427,21 @@ const AdminTeam = () => {
             ) : (
               members.map((member) => (
                 <TableRow key={member.id}>
-                  <TableCell className="font-medium">{member.name_fr || member.name}</TableCell>
+                  <TableCell className="font-medium">{member.name}</TableCell>
                   <TableCell>
                     <div className="flex gap-1">
-                      {member.name_fr && <Badge variant="outline">FR</Badge>}
-                      {member.name_pl && <Badge variant="outline">PL</Badge>}
+                      {member.name && <Badge variant="outline">FR</Badge>}
+                      {member.name && member.role_pl && <Badge variant="outline">PL</Badge>}
                     </div>
                   </TableCell>
-                  <TableCell>{member.role_fr || member.role}</TableCell>
+                  <TableCell>{member.role_fr}</TableCell>
                   <TableCell>
                     <Badge variant="outline">{getCategoryLabel(member.category)}</Badge>
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className={
-                      member.community === 'pl' ? 'border-red-500 text-red-600' : 
-                      member.community === 'both' ? 'border-purple-500 text-purple-600' : 
+                      member.community === 'pl' ? 'border-red-500 text-red-600' :
+                      member.community === 'both' ? 'border-purple-500 text-purple-600' :
                       'border-blue-500 text-blue-600'
                     }>
                       {member.community === 'pl' ? '🇵🇱 PL' : member.community === 'both' ? '🇫🇷🇵🇱' : '🇫🇷 FR'}

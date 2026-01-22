@@ -38,15 +38,27 @@ const authRoutes = require('./routes/auth');
 const podcastRoutes = require('./routes/podcast');
 const homilyRoutes = require('./routes/homilies');
 const uploadRoutes = require('./routes/uploads');
+const messageRoutes = require('./routes/messages');
+const newsletterRoutes = require('./routes/newsletter');
+const pageRoutes = require('./routes/pages');
+const faqRoutes = require('./routes/faq');
+const footerRoutes = require('./routes/footer');
+const lifeStagesRoutes = require('./routes/lifeStages');
 
 // Utilisation des routes
 app.use('/api/auth', authRoutes);
 app.use('/api/articles', articleRoutes);
 app.use('/api/team', teamRoutes);
 app.use('/api/schedules', scheduleRoutes);
+app.use('/api/pages', pageRoutes);
+app.use('/api/faq', faqRoutes);
 app.use('/api/homilies', homilyRoutes);
 app.use('/podcast', podcastRoutes);
 app.use('/api/uploads', uploadRoutes);
+app.use('/api/messages', messageRoutes);
+app.use('/api/newsletter', newsletterRoutes);
+app.use('/api/footer', footerRoutes);
+app.use('/api/life-stages', lifeStagesRoutes);
 
 // Route de test pour vérifier que le serveur répond
 app.get('/api/health', (req, res) => {

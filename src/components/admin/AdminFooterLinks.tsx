@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus, Pencil, Trash2, GripVertical, Link as LinkIcon } from 'lucide-react';
 import { toast } from 'sonner';
+import { useBackendAuth } from '@/hooks/useBackendAuth';
 
 interface FooterLink {
   id: string;
@@ -16,12 +16,15 @@ interface FooterLink {
   label_fr: string | null;
   label_pl: string | null;
   url: string;
-  sort_order: number | null;
+  sortOrder: number | null;
   active: boolean | null;
 }
 
 const AdminFooterLinks = () => {
   const { t } = useTranslation();
+  const { token } = useBackendAuth();
+  const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:10000/api').replace(/\/$/, '');
+
   const [links, setLinks] = useState<FooterLink[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -31,23 +34,29 @@ const AdminFooterLinks = () => {
     label_fr: '',
     label_pl: '',
     url: '',
-    sort_order: 0,
+    sortOrder: 0,
     active: true,
   });
 
-  const fetchLinks = async () => {
-    const { data, error } = await supabase
-      .from('footer_links')
-      .select('*')
-      .order('sort_order', { ascending: true });
+  const headersAuth = (): Record<string, string> => {
+    const h: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) h.Authorization = `Bearer ${token}`;
+    return h;
+  };
 
-    if (error) {
+  const fetchLinks = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${apiBase}/footer/all`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+      if (!res.ok) throw new Error('Chargement impossible');
+      const data = await res.json();
+      setLinks(data || []);
+    } catch (error) {
       toast.error(t('admin.errors.fetchFailed'));
       console.error(error);
-    } else {
-      setLinks(data || []);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -60,7 +69,7 @@ const AdminFooterLinks = () => {
       label_fr: '',
       label_pl: '',
       url: '',
-      sort_order: links.length,
+      sortOrder: links.length,
       active: true,
     });
     setEditingLink(null);
@@ -78,7 +87,7 @@ const AdminFooterLinks = () => {
       label_fr: link.label_fr || '',
       label_pl: link.label_pl || '',
       url: link.url,
-      sort_order: link.sort_order || 0,
+      sortOrder: link.sortOrder || 0,
       active: link.active ?? true,
     });
     setIsDialogOpen(true);
@@ -87,72 +96,60 @@ const AdminFooterLinks = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const linkData = {
+    const payload = {
       label: formData.label,
       label_fr: formData.label_fr || null,
       label_pl: formData.label_pl || null,
       url: formData.url,
-      sort_order: formData.sort_order,
+      sortOrder: formData.sortOrder ?? 0,
       active: formData.active,
     };
 
-    if (editingLink) {
-      const { error } = await supabase
-        .from('footer_links')
-        .update(linkData)
-        .eq('id', editingLink.id);
+    const method = editingLink ? 'PUT' : 'POST';
+    const url = editingLink ? `${apiBase}/footer/${editingLink.id}` : `${apiBase}/footer`;
 
-      if (error) {
-        toast.error(t('admin.errors.updateFailed'));
-        console.error(error);
-      } else {
-        toast.success(t('admin.success.updated'));
-        fetchLinks();
-        setIsDialogOpen(false);
-      }
-    } else {
-      const { error } = await supabase
-        .from('footer_links')
-        .insert(linkData);
-
-      if (error) {
-        toast.error(t('admin.errors.createFailed'));
-        console.error(error);
-      } else {
-        toast.success(t('admin.success.created'));
-        fetchLinks();
-        setIsDialogOpen(false);
-      }
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: headersAuth(),
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error('Enregistrement impossible');
+      toast.success(editingLink ? t('admin.success.updated') : t('admin.success.created'));
+      fetchLinks();
+      setIsDialogOpen(false);
+    } catch (error) {
+      toast.error(t('admin.errors.updateFailed'));
+      console.error(error);
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm(t('admin.confirmDelete'))) return;
-
-    const { error } = await supabase
-      .from('footer_links')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      toast.error(t('admin.errors.deleteFailed'));
-      console.error(error);
-    } else {
+    try {
+      const res = await fetch(`${apiBase}/footer/${id}`, {
+        method: 'DELETE',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error('Suppression impossible');
       toast.success(t('admin.success.deleted'));
       fetchLinks();
+    } catch (error) {
+      toast.error(t('admin.errors.deleteFailed'));
     }
   };
 
   const toggleActive = async (link: FooterLink) => {
-    const { error } = await supabase
-      .from('footer_links')
-      .update({ active: !link.active })
-      .eq('id', link.id);
-
-    if (error) {
-      toast.error(t('admin.errors.updateFailed'));
-    } else {
+    try {
+      const res = await fetch(`${apiBase}/footer/${link.id}`, {
+        method: 'PUT',
+        headers: headersAuth(),
+        body: JSON.stringify({ active: !link.active }),
+      });
+      if (!res.ok) throw new Error();
       fetchLinks();
+    } catch {
+      toast.error(t('admin.errors.updateFailed'));
     }
   };
 
@@ -219,12 +216,12 @@ const AdminFooterLinks = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="sort_order">{t('admin.footerLinks.sortOrder')}</Label>
+                <Label htmlFor="sortOrder">{t('admin.footerLinks.sortOrder')}</Label>
                 <Input
-                  id="sort_order"
+                  id="sortOrder"
                   type="number"
-                  value={formData.sort_order}
-                  onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) || 0 })}
+                  value={formData.sortOrder}
+                  onChange={(e) => setFormData({ ...formData, sortOrder: parseInt(e.target.value) || 0 })}
                 />
               </div>
 
@@ -260,7 +257,7 @@ const AdminFooterLinks = () => {
                   <div className="flex items-center gap-2">
                     <LinkIcon size={16} className="text-primary" />
                     <span className="font-medium">{link.label_fr || link.label}</span>
-                    <span className="text-xs text-muted-foreground">({link.sort_order})</span>
+                    <span className="text-xs text-muted-foreground">({link.sortOrder ?? 0})</span>
                   </div>
                   <p className="text-sm text-muted-foreground">{link.url}</p>
                 </div>
