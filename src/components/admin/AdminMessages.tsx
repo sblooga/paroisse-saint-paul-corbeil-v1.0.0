@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Eye, Trash2, Download, Check, X, Mail } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +9,7 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
+import { useBackendAuth } from '@/hooks/useBackendAuth';
 
 interface ContactMessage {
   id: string;
@@ -17,13 +17,15 @@ interface ContactMessage {
   email: string;
   subject: string;
   message: string;
-  newsletter_optin: boolean;
+  newsletter_optin?: boolean;
   read: boolean;
-  created_at: string;
+  createdAt: string;
 }
 
 const AdminMessages = () => {
   const { toast } = useToast();
+  const { token } = useBackendAuth();
+  const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:10000/api').replace(/\/$/, '');
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
@@ -34,25 +36,32 @@ const AdminMessages = () => {
 
   const fetchMessages = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('contact_messages')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (data) setMessages(data);
-    if (error) console.error('Error fetching messages:', error);
-    setLoading(false);
+    try {
+      const res = await fetch(`${apiBase}/messages`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error('Chargement impossible');
+      const data = await res.json();
+      setMessages(data);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      toast({ title: 'Erreur', description: 'Impossible de charger les messages', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const markAsRead = async (id: string) => {
-    const { error } = await supabase
-      .from('contact_messages')
-      .update({ read: true })
-      .eq('id', id);
-
-    if (!error) {
+    try {
+      const res = await fetch(`${apiBase}/messages/${id}/read`, {
+        method: 'PUT',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error();
       setMessages(prev => prev.map(m => m.id === id ? { ...m, read: true } : m));
       toast({ title: 'Message marqué comme lu' });
+    } catch {
+      toast({ title: 'Erreur', description: 'Impossible de marquer comme lu', variant: 'destructive' });
     }
   };
 
@@ -60,30 +69,33 @@ const AdminMessages = () => {
     const unreadIds = messages.filter(m => !m.read).map(m => m.id);
     if (unreadIds.length === 0) return;
 
-    const { error } = await supabase
-      .from('contact_messages')
-      .update({ read: true })
-      .in('id', unreadIds);
-
-    if (!error) {
+    try {
+      await Promise.all(unreadIds.map(id =>
+        fetch(`${apiBase}/messages/${id}/read`, {
+          method: 'PUT',
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        })
+      ));
       setMessages(prev => prev.map(m => ({ ...m, read: true })));
       toast({ title: 'Tous les messages marqués comme lus' });
+    } catch {
+      toast({ title: 'Erreur', description: 'Impossible de tout marquer comme lu', variant: 'destructive' });
     }
   };
 
   const deleteMessage = async (id: string) => {
     if (!confirm('Supprimer ce message ?')) return;
 
-    const { error } = await supabase
-      .from('contact_messages')
-      .delete()
-      .eq('id', id);
-
-    if (!error) {
+    try {
+      const res = await fetch(`${apiBase}/messages/${id}`, {
+        method: 'DELETE',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error();
       setMessages(prev => prev.filter(m => m.id !== id));
       setSelectedMessage(null);
       toast({ title: 'Message supprimé' });
-    } else {
+    } catch {
       toast({ title: 'Erreur', description: 'Impossible de supprimer', variant: 'destructive' });
     }
   };
@@ -99,7 +111,7 @@ const AdminMessages = () => {
     const csvContent = [
       ['Date', 'Nom', 'Email', 'Sujet', 'Message', 'Newsletter', 'Lu'].join(';'),
       ...messages.map(m => [
-        formatDate(m.created_at),
+        formatDate(m.createdAt),
         `"${m.name}"`,
         m.email,
         `"${m.subject}"`,

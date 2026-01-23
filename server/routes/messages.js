@@ -18,13 +18,19 @@ router.get('/', requireAuth, requireRole('ADMIN'), async (req, res) => {
 
 // Création d'un message (public)
 router.post('/', async (req, res) => {
-  const { name, email, subject, message } = req.body;
+  const { name, email, subject, message, newsletter_optin } = req.body;
   if (!name || !email || !message) {
     return res.status(400).json({ message: 'name, email, message requis' });
   }
   try {
     const created = await prisma.contactMessage.create({
-      data: { name, email, subject: subject || null, message }
+      data: {
+        name,
+        email,
+        subject: subject || null,
+        message,
+        newsletter_optin: Boolean(newsletter_optin)
+      }
     });
     res.status(201).json(created);
   } catch (error) {

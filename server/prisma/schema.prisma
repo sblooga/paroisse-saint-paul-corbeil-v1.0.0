@@ -84,6 +84,7 @@ model ContactMessage {
   subject   String?
   message   String
   read      Boolean  @default(false)
+  newsletter_optin Boolean @default(false)
   createdAt DateTime @default(now())
 }
 
@@ -148,6 +149,7 @@ model FaqItem {
   active      Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  imageUrl    String?
 
   category FaqCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 }

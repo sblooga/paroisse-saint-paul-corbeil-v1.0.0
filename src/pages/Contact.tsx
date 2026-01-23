@@ -3,7 +3,6 @@ import { MapPin, Phone, Mail, Clock, Send, CheckCircle, MessageCircle } from 'lu
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import BackToTop from '@/components/BackToTop';
@@ -23,6 +22,7 @@ import {
 const Contact = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:10000/api').replace(/\/$/, '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -62,28 +62,27 @@ const Contact = () => {
       const categoryLabel = formData.category ? `[${formData.category.toUpperCase()}] ` : '';
       const fullSubject = `${categoryLabel}${formData.subject.trim()}`;
 
-      const { error: messageError } = await supabase
-        .from('contact_messages')
-        .insert({
+      const msgRes = await fetch(`${apiBase}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           name: formData.name.trim(),
           email: formData.email.trim().toLowerCase(),
           subject: fullSubject,
           message: formData.message.trim(),
           newsletter_optin: formData.newsletter,
-        });
-
-      if (messageError) throw messageError;
+        }),
+      });
+      if (!msgRes.ok) throw new Error('Envoi du message impossible');
 
       if (formData.newsletter) {
-        const { error: subscriberError } = await supabase
-          .from('newsletter_subscribers')
-          .upsert(
-            { email: formData.email.trim().toLowerCase() },
-            { onConflict: 'email' }
-          );
-        
-        if (subscriberError) {
-          console.error('Newsletter subscription error:', subscriberError);
+        const newsRes = await fetch(`${apiBase}/newsletter`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: formData.email.trim().toLowerCase() }),
+        });
+        if (!newsRes.ok) {
+          console.error('Newsletter subscription error');
         }
       }
 

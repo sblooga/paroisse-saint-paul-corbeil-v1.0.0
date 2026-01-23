@@ -75,10 +75,17 @@ router.delete('/categories/:id', requireAuth, requireRole('ADMIN'), async (req, 
 
 // CRUD Items
 router.post('/items', requireAuth, requireRole('ADMIN'), async (req, res) => {
-  const { question_fr, categoryId, sort_order = 0, active = true } = req.body;
+  const { question_fr, categoryId, sort_order = 0, active = true, imageUrl = null } = req.body;
   if (!question_fr || !categoryId) return res.status(400).json({ message: 'question_fr et categoryId requis' });
   try {
-    const item = await prisma.faqItem.create({ data: { ...req.body, sort_order, active } });
+    const item = await prisma.faqItem.create({
+      data: {
+        ...req.body,
+        imageUrl,
+        sort_order,
+        active
+      }
+    });
     res.status(201).json(item);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -89,7 +96,10 @@ router.put('/items/:id', requireAuth, requireRole('ADMIN'), async (req, res) => 
   try {
     const item = await prisma.faqItem.update({
       where: { id: req.params.id },
-      data: req.body
+      data: {
+        ...req.body,
+        imageUrl: req.body.imageUrl ?? null
+      }
     });
     res.json(item);
   } catch (error) {

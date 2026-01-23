@@ -44,6 +44,7 @@ const pageRoutes = require('./routes/pages');
 const faqRoutes = require('./routes/faq');
 const footerRoutes = require('./routes/footer');
 const lifeStagesRoutes = require('./routes/lifeStages');
+const docsRoutes = require('./routes/docs');
 
 // Utilisation des routes
 app.use('/api/auth', authRoutes);
@@ -59,6 +60,7 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/newsletter', newsletterRoutes);
 app.use('/api/footer', footerRoutes);
 app.use('/api/life-stages', lifeStagesRoutes);
+app.use('/api/docs-password', docsRoutes);
 
 // Route de test pour vérifier que le serveur répond
 app.get('/api/health', (req, res) => {

@@ -6,7 +6,6 @@ import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import BackToTop from '@/components/BackToTop';
-import { supabase } from '@/integrations/supabase/client';
 import {
   Accordion,
   AccordionContent,
@@ -18,53 +17,56 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Church, Users, Info, HelpCircle, Book, Calendar, Heart, Star,
 };
 
-interface FAQCategory {
-  id: string;
-  title: string;
-  title_fr: string | null;
-  title_pl: string | null;
-  icon: string;
-  sort_order: number;
-}
-
 interface FAQItem {
   id: string;
-  category_id: string;
-  question: string;
   question_fr: string | null;
   question_pl: string | null;
-  answer: string;
   answer_fr: string | null;
   answer_pl: string | null;
-  sort_order: number;
+  imageUrl?: string | null;
+  sort_order?: number;
+  active?: boolean;
+}
+
+interface FAQCategory {
+  id: string;
+  name: string;
+  sort_order?: number;
+  active?: boolean;
+  items?: FAQItem[];
+  icon?: string | null;
 }
 
 const FAQ = () => {
   const { t, i18n } = useTranslation();
   const [categories, setCategories] = useState<FAQCategory[]>([]);
-  const [items, setItems] = useState<FAQItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:10000/api').replace(/\/$/, '');
 
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
-    const [catRes, itemRes] = await Promise.all([
-      supabase.from('faq_categories').select('*').eq('active', true).order('sort_order'),
-      supabase.from('faq_items').select('*').eq('active', true).order('sort_order'),
-    ]);
-    if (catRes.data) setCategories(catRes.data);
-    if (itemRes.data) setItems(itemRes.data);
-    setLoading(false);
+    setLoading(true);
+    try {
+      const res = await fetch(`${apiBase}/faq`);
+      if (!res.ok) throw new Error('Chargement impossible');
+      const data = await res.json();
+      const cats = (data as FAQCategory[]).sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+      setCategories(cats);
+    } catch (error) {
+      console.error('Error fetching FAQ:', error);
+      setCategories([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const getLocalizedText = (fr: string | null, pl: string | null, fallback: string) => {
+  const getLocalizedText = (fr: string | null, pl: string | null, fallback?: string) => {
     if (i18n.language === 'pl' && pl) return pl;
-    return fr || fallback;
+    return fr || fallback || '';
   };
-
-  const getItemsForCategory = (categoryId: string) => items.filter(i => i.category_id === categoryId);
 
   // Fallback data if no database entries
   const fallbackCategories = [
@@ -129,7 +131,9 @@ const FAQ = () => {
               // Database content
               categories.map((category, categoryIndex) => {
                 const IconComponent = ICON_MAP[category.icon] || HelpCircle;
-                const categoryItems = getItemsForCategory(category.id);
+                const categoryItems = (category.items || []).sort(
+                  (a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)
+                );
                 return (
                   <motion.div
                     key={category.id}
@@ -143,7 +147,7 @@ const FAQ = () => {
                       <span className="w-12 h-12 bg-soft-blue/10 rounded-xl flex items-center justify-center">
                         <IconComponent className="text-soft-blue" size={24} />
                       </span>
-                      {getLocalizedText(category.title_fr, category.title_pl, category.title)}
+                      {category.name}
                     </h2>
                     <Accordion type="single" collapsible className="space-y-3">
                       {categoryItems.map((item, index) => (
@@ -153,10 +157,23 @@ const FAQ = () => {
                           className="card-parish border-none px-6 data-[state=open]:shadow-lg transition-shadow"
                         >
                           <AccordionTrigger className="text-left text-base md:text-lg font-semibold text-foreground hover:text-soft-blue hover:no-underline py-5">
-                            {getLocalizedText(item.question_fr, item.question_pl, item.question)}
+                            {getLocalizedText(item.question_fr, item.question_pl, item.question_fr || '')}
                           </AccordionTrigger>
                           <AccordionContent className="text-base text-muted-foreground pb-5 leading-relaxed">
-                            {getLocalizedText(item.answer_fr, item.answer_pl, item.answer)}
+                            <div className="flex flex-col md:flex-row gap-4">
+                              {item.imageUrl && (
+                                <div className="md:w-1/3 flex-shrink-0">
+                                  <img
+                                    src={item.imageUrl}
+                                    alt={item.question_fr || ''}
+                                    className="w-full h-40 object-cover rounded-xl shadow-md"
+                                  />
+                                </div>
+                              )}
+                              <div className={item.imageUrl ? 'md:w-2/3' : 'w-full'}>
+                                {getLocalizedText(item.answer_fr, item.answer_pl, item.answer_fr || '')}
+                              </div>
+                            </div>
                           </AccordionContent>
                         </AccordionItem>
                       ))}

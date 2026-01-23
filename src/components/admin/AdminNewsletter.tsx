@@ -1,22 +1,26 @@
 import { useState, useEffect } from 'react';
 import { Download, UserX, UserCheck, Trash2 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
+import { useBackendAuth } from '@/hooks/useBackendAuth';
 
 interface NewsletterSubscriber {
   id: string;
   email: string;
   active: boolean;
-  consent_date: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 const AdminNewsletter = () => {
   const { toast } = useToast();
+  const { token } = useBackendAuth();
+  const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:10000/api').replace(/\/$/, '');
+
   const [subscribers, setSubscribers] = useState<NewsletterSubscriber[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -26,40 +30,48 @@ const AdminNewsletter = () => {
 
   const fetchSubscribers = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('newsletter_subscribers')
-      .select('*')
-      .order('consent_date', { ascending: false });
-
-    if (data) setSubscribers(data);
-    if (error) console.error('Error fetching subscribers:', error);
-    setLoading(false);
+    try {
+      const res = await fetch(`${apiBase}/newsletter`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error('Chargement impossible');
+      const data = await res.json();
+      setSubscribers(data);
+    } catch (error) {
+      console.error('Error fetching subscribers:', error);
+      toast({ title: 'Erreur', description: 'Impossible de charger les abonnés', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const toggleStatus = async (id: string, currentStatus: boolean) => {
-    const { error } = await supabase
-      .from('newsletter_subscribers')
-      .update({ active: !currentStatus })
-      .eq('id', id);
-
-    if (!error) {
+    try {
+      const res = await fetch(`${apiBase}/newsletter/${id}`, {
+        method: 'PATCH',
+        headers: token ? { Authorization: `Bearer ${token}` } : { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ active: !currentStatus }),
+      });
+      if (!res.ok) throw new Error();
       setSubscribers(prev => prev.map(s => s.id === id ? { ...s, active: !currentStatus } : s));
       toast({ title: currentStatus ? 'Abonné désactivé' : 'Abonné réactivé' });
+    } catch {
+      toast({ title: 'Erreur', description: 'Impossible de mettre à jour', variant: 'destructive' });
     }
   };
 
   const deleteSubscriber = async (id: string) => {
     if (!confirm('Supprimer cet abonné définitivement ?')) return;
 
-    const { error } = await supabase
-      .from('newsletter_subscribers')
-      .delete()
-      .eq('id', id);
-
-    if (!error) {
+    try {
+      const res = await fetch(`${apiBase}/newsletter/${id}`, {
+        method: 'DELETE',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error();
       setSubscribers(prev => prev.filter(s => s.id !== id));
       toast({ title: 'Abonné supprimé' });
-    } else {
+    } catch {
       toast({ title: 'Erreur', description: 'Impossible de supprimer', variant: 'destructive' });
     }
   };
@@ -71,7 +83,7 @@ const AdminNewsletter = () => {
       ['Email', 'Date inscription', 'Statut'].join(';'),
       ...data.map(s => [
         s.email,
-        formatDate(s.consent_date),
+        formatDate(s.createdAt || s.updatedAt),
         s.active ? 'Actif' : 'Inactif',
       ].join(';'))
     ].join('\n');
@@ -84,7 +96,8 @@ const AdminNewsletter = () => {
     toast({ title: `Export de ${data.length} abonné(s) terminé` });
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('fr-FR', {
       day: '2-digit',
       month: 'short',

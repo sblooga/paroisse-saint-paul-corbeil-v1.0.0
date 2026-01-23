@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -12,17 +11,13 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 interface TeamMemberPublic {
   id: string;
   name: string;
-  role: string;
-  category: string;
-  photo_url: string | null;
-  bio: string | null;
-  name_fr: string | null;
-  name_pl: string | null;
-  role_fr: string | null;
+  role_fr: string;
   role_pl: string | null;
+  category: string;
+  photoUrl: string | null;
   bio_fr: string | null;
   bio_pl: string | null;
-  sort_order: number;
+  order: number;
   community?: string | null;
 }
 
@@ -35,18 +30,27 @@ const Team = () => {
   const [communityFilter, setCommunityFilter] = useState<'fr' | 'pl'>('fr');
 
   const currentLang = i18n.language?.startsWith('pl') ? 'pl' : 'fr';
+  const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:10000/api').replace(/\/$/, '');
 
   useEffect(() => {
     fetchMembers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchMembers = async () => {
-    // Use secure function that excludes sensitive contact information (email, phone)
-    const { data, error } = await supabase.rpc('get_team_members_public');
-
-    if (data) setMembers(data as TeamMemberPublic[]);
-    if (error) console.error('Error fetching team members:', error);
-    setLoading(false);
+    setLoading(true);
+    try {
+      const res = await fetch(`${apiBase}/team`);
+      if (!res.ok) throw new Error('Chargement impossible');
+      const data = await res.json();
+      const sorted = (data as TeamMemberPublic[]).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+      setMembers(sorted);
+    } catch (error) {
+      console.error('Error fetching team members:', error);
+      setMembers([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getCategoryLabel = (category: string) => {
@@ -54,28 +58,28 @@ const Team = () => {
   };
 
   const getLocalizedName = (member: TeamMemberPublic) => {
-    if (currentLang === 'pl' && member.name_pl) return member.name_pl;
-    return member.name_fr || member.name;
+    if (currentLang === 'pl' && member.name) return member.name;
+    return member.name;
   };
 
   const getLocalizedRole = (member: TeamMemberPublic) => {
     if (currentLang === 'pl' && member.role_pl) return member.role_pl;
-    return member.role_fr || member.role;
+    return member.role_fr;
   };
 
   const getLocalizedBio = (member: TeamMemberPublic) => {
     if (currentLang === 'pl' && member.bio_pl) return member.bio_pl;
-    return member.bio_fr || member.bio;
+    return member.bio_fr;
   };
 
   // Filter members by community
-  const filteredMembers = members.filter(m => {
-    if (m.community === 'both') return true;
+  const filteredMembers = members.filter((m) => {
+    if (m.community === 'both' || !m.community) return true;
     return m.community === communityFilter;
   });
 
   const groupedMembers = CATEGORY_ORDER.reduce((acc, category) => {
-    const categoryMembers = filteredMembers.filter(m => m.category === category);
+    const categoryMembers = filteredMembers.filter((m) => m.category === category);
     if (categoryMembers.length > 0) {
       acc[category] = categoryMembers;
     }
@@ -164,9 +168,9 @@ const Team = () => {
                           className="card-parish p-6 text-center group"
                         >
                           <div className="relative mb-4 mx-auto w-28 h-28">
-                            {member.photo_url ? (
+                            {member.photoUrl ? (
                               <img
-                                src={member.photo_url}
+                                src={member.photoUrl}
                                 alt={getLocalizedName(member)}
                                 className="w-full h-full rounded-full object-cover border-4 border-accent shadow-lg group-hover:border-primary transition-colors"
                               />

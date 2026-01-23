@@ -4,7 +4,6 @@ import { Folder, FolderOpen, FileText, Download, ExternalLink, ChevronRight, Che
 import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
@@ -23,6 +22,7 @@ const Downloads = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:10000/api').replace(/\/$/, '');
 
   // Check if already authenticated in session
   useEffect(() => {
@@ -32,7 +32,7 @@ const Downloads = () => {
 
   const content = {
     fr: {
-      title: 'Docs Équipes',
+      title: 'Intranet',
       subtitle: 'Documents paroissiaux',
       description: 'Retrouvez ici les documents de la paroisse. Cliquez sur un dossier pour l\'ouvrir, puis sur un document pour le télécharger.',
       instructions: 'Les documents s\'ouvrent dans Google Drive. Vous pouvez les consulter en ligne ou les télécharger.',
@@ -44,7 +44,7 @@ const Downloads = () => {
       passwordError: 'Code incorrect. Veuillez réessayer.',
     },
     pl: {
-      title: 'Dokumenty Zespołów',
+      title: 'Intranet',
       subtitle: 'Dokumenty parafialne',
       description: 'Znajdziesz tutaj dokumenty parafii. Kliknij folder, aby go otworzyć, a następnie dokument, aby go pobrać.',
       instructions: 'Dokumenty otwierają się w Google Drive. Możesz je przeglądać online lub pobierać.',
@@ -92,19 +92,26 @@ const Downloads = () => {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.rpc('verify_docs_password', {
-        input_password: password
+      const res = await fetch(`${apiBase}/docs-password/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: password.trim() }),
       });
-
-      if (error) throw error;
-
-      if (data === true) {
-        setIsAuthenticated(true);
-        sessionStorage.setItem('docs_authenticated', 'true');
-        toast.success(currentLang === 'pl' ? 'Dostęp przyznany' : 'Accès autorisé');
-      } else {
+      if (res.status === 401) {
         toast.error(t.passwordError);
         setPassword('');
+      } else if (!res.ok) {
+        throw new Error('Erreur de vérification');
+      } else {
+        const data = await res.json();
+        if (data.valid) {
+          setIsAuthenticated(true);
+          sessionStorage.setItem('docs_authenticated', 'true');
+          toast.success(currentLang === 'pl' ? 'Dostęp przyznany' : 'Accès autorisé');
+        } else {
+          toast.error(t.passwordError);
+          setPassword('');
+        }
       }
     } catch (error) {
       console.error('Error verifying password:', error);

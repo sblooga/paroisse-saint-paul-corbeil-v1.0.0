@@ -48,6 +48,22 @@ router.post('/unsubscribe', async (req, res) => {
   }
 });
 
+// Mise à jour (admin) ex: active true/false
+router.patch('/:id', requireAuth, requireRole('ADMIN'), async (req, res) => {
+  try {
+    const updated = await prisma.newsletterSubscriber.update({
+      where: { id: req.params.id },
+      data: {
+        active: typeof req.body.active === 'boolean' ? req.body.active : undefined
+      }
+    });
+    res.json(updated);
+  } catch (error) {
+    if (error.code === 'P2025') return res.status(404).json({ message: 'Abonné introuvable' });
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Suppression (admin)
 router.delete('/:id', requireAuth, requireRole('ADMIN'), async (req, res) => {
   try {

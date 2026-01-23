@@ -5,12 +5,14 @@ import { Lock, Eye, EyeOff, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useBackendAuth } from '@/hooks/useBackendAuth';
 
 const AdminDocsPassword = () => {
   const { i18n } = useTranslation();
   const currentLang = i18n.language?.startsWith('pl') ? 'pl' : 'fr';
+  const { token } = useBackendAuth();
+  const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:10000/api').replace(/\/$/, '');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -62,11 +64,12 @@ const AdminDocsPassword = () => {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.rpc('update_docs_password', {
-        new_password: newPassword
+      const res = await fetch(`${apiBase}/docs-password`, {
+        method: 'PUT',
+        headers: token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: newPassword }),
       });
-
-      if (error) throw error;
+      if (!res.ok) throw new Error('Impossible d\'enregistrer');
 
       toast.success(t.success);
       setNewPassword('');

@@ -1,12 +1,27 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Heart, Mail, Phone, Droplets, BookOpen, Flame, RefreshCw, Church, HelpCircle, HeartHandshake, Flower2, Star, Hand, Gem } from 'lucide-react';
+import {
+  Heart,
+  Mail,
+  Phone,
+  Droplets,
+  BookOpen,
+  Flame,
+  RefreshCw,
+  Church,
+  HelpCircle,
+  HeartHandshake,
+  Flower2,
+  Star,
+  Hand,
+  Gem,
+  Cross,
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import BackToTop from '@/components/BackToTop';
-import { supabase } from '@/integrations/supabase/client';
 import {
   Accordion,
   AccordionContent,
@@ -25,47 +40,66 @@ import anointingImg from '@/assets/sacrament-anointing.jpg';
 import funeralsImg from '@/assets/sacrament-funerals.jpg';
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string; size?: number }>> = {
-  Droplets, BookOpen, Flame, Heart, Gem, Church, Hand, Candle: Flower2, Star, RefreshCw, HelpCircle, HeartHandshake, Flower2,
+  Droplets,
+  BookOpen,
+  Flame,
+  Heart,
+  Gem,
+  Church,
+  Hand,
+  Star,
+  Cross,
+  RefreshCw,
+  HelpCircle,
+  HeartHandshake,
+  Flower2,
 };
 
 interface LifeStage {
   id: string;
-  title: string;
-  title_fr: string | null;
+  title_fr: string;
   title_pl: string | null;
-  description: string;
-  description_fr: string | null;
+  description_fr: string;
   description_pl: string | null;
-  icon: string;
-  image_url: string | null;
-  sort_order: number;
+  icon: string | null;
+  imageUrl: string | null;
+  sortOrder: number;
+  active: boolean;
 }
 
 const LifeStages = () => {
   const { t, i18n } = useTranslation();
   const [stages, setStages] = useState<LifeStage[]>([]);
   const [loading, setLoading] = useState(true);
+  const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:10000/api').replace(/\/$/, '');
 
   useEffect(() => {
     fetchStages();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchStages = async () => {
-    const { data } = await supabase
-      .from('life_stages')
-      .select('*')
-      .eq('active', true)
-      .order('sort_order');
-    if (data) setStages(data);
-    setLoading(false);
+    setLoading(true);
+    try {
+      const res = await fetch(`${apiBase}/life-stages`);
+      if (!res.ok) throw new Error('Chargement impossible');
+      const data = await res.json();
+      // tri secondaire par title si même sortOrder
+      const ordered = (data as LifeStage[]).sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+      setStages(ordered);
+    } catch (error) {
+      console.error('Error fetching life stages:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const getLocalizedText = (fr: string | null, pl: string | null, fallback: string) => {
+  const getLocalizedText = (fr: string | null, pl: string | null) => {
     if (i18n.language === 'pl' && pl) return pl;
-    return fr || fallback;
+    return fr || '';
   };
 
-  // Fallback data
+  // Fallback data (si aucune donnée en base)
   const fallbackStages = [
     { key: 'baptism', icon: Droplets, image: baptismImg, question: t('lifeStages.items.baptism.question'), answer: t('lifeStages.items.baptism.answer') },
     { key: 'communion', icon: BookOpen, image: communionImg, question: t('lifeStages.items.communion.question'), answer: t('lifeStages.items.communion.answer') },
@@ -111,9 +145,10 @@ const LifeStages = () => {
             ) : (
               <Accordion type="single" collapsible className="space-y-4">
                 {hasDbData ? (
-                  // Database content
                   stages.map((stage, index) => {
-                    const IconComponent = ICON_MAP[stage.icon] || Heart;
+                    const IconComponent = (stage.icon && ICON_MAP[stage.icon]) || Heart;
+                    const title = getLocalizedText(stage.title_fr, stage.title_pl) || stage.title_fr;
+                    const description = getLocalizedText(stage.description_fr, stage.description_pl) || stage.description_fr;
                     return (
                       <motion.div
                         key={stage.id}
@@ -132,24 +167,24 @@ const LifeStages = () => {
                                 <IconComponent className="text-dusty-rose" size={24} />
                               </div>
                               <span className="text-base md:text-lg font-semibold text-dusty-rose">
-                                {getLocalizedText(stage.title_fr, stage.title_pl, stage.title)}
+                                {title}
                               </span>
                             </div>
                           </AccordionTrigger>
                           <AccordionContent className="pb-5 pl-16">
                             <div className="flex flex-col md:flex-row gap-6">
-                              {stage.image_url && (
+                              {stage.imageUrl && (
                                 <div className="md:w-1/3 flex-shrink-0">
                                   <img
-                                    src={stage.image_url}
-                                    alt={stage.title}
+                                    src={stage.imageUrl}
+                                    alt={title}
                                     className="w-full h-48 md:h-40 object-cover rounded-xl shadow-md"
                                   />
                                 </div>
                               )}
-                              <div className={stage.image_url ? "md:w-2/3" : "w-full"}>
+                              <div className={stage.imageUrl ? 'md:w-2/3' : 'w-full'}>
                                 <p className="text-base text-muted-foreground leading-relaxed">
-                                  {getLocalizedText(stage.description_fr, stage.description_pl, stage.description)}
+                                  {description}
                                 </p>
                               </div>
                             </div>
@@ -159,7 +194,6 @@ const LifeStages = () => {
                     );
                   })
                 ) : (
-                  // Fallback content
                   fallbackStages.map((stage, index) => (
                     <motion.div
                       key={stage.key}

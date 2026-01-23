@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useBackendAuth } from '@/hooks/useBackendAuth';
+import { ImageUpload } from '@/components/ui/image-upload';
 
 interface FaqItem {
   id: string;
@@ -27,6 +28,7 @@ interface FaqItem {
   answer_pl: string | null;
   sort_order: number;
   active: boolean;
+  imageUrl?: string | null;
 }
 
 interface FaqCategory {
@@ -62,6 +64,7 @@ const AdminFAQ = () => {
     answer_pl: '',
     sort_order: 0,
     active: true,
+    imageUrl: '',
   });
 
   const headersAuth = (): Record<string, string> => {
@@ -153,7 +156,7 @@ const AdminFAQ = () => {
 
   // Item handlers
   const resetItemForm = () => {
-    setItemForm({ question_fr: '', question_pl: '', answer_fr: '', answer_pl: '', sort_order: 0, active: true });
+    setItemForm({ question_fr: '', question_pl: '', answer_fr: '', answer_pl: '', sort_order: 0, active: true, imageUrl: '' });
     setEditingItem(null);
     setSelectedCategoryId('');
   };
@@ -174,6 +177,7 @@ const AdminFAQ = () => {
       answer_pl: item.answer_pl || '',
       sort_order: item.sort_order,
       active: item.active,
+      imageUrl: item.imageUrl || '',
     });
     setItemDialogOpen(true);
   };
@@ -193,6 +197,7 @@ const AdminFAQ = () => {
       answer_pl: itemForm.answer_pl || null,
       sort_order: itemForm.sort_order,
       active: itemForm.active,
+      imageUrl: itemForm.imageUrl || null,
     };
 
     const method = editingItem ? 'PUT' : 'POST';
@@ -365,19 +370,27 @@ const AdminFAQ = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label>Ordre</Label>
-                <Input
-                  type="number"
-                  value={itemForm.sort_order}
-                  onChange={(e) => setItemForm(prev => ({ ...prev, sort_order: parseInt(e.target.value) || 0 }))}
-                />
+                <div className="space-y-2">
+                  <Label>Ordre</Label>
+                  <Input
+                    type="number"
+                    value={itemForm.sort_order}
+                    onChange={(e) => setItemForm(prev => ({ ...prev, sort_order: parseInt(e.target.value) || 0 }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Image (optionnelle)</Label>
+                  <ImageUpload
+                    value={itemForm.imageUrl}
+                    onChange={(url) => setItemForm(prev => ({ ...prev, imageUrl: url }))}
+                    folder="faq"
+                  />
+                </div>
               </div>
-            </div>
             
-            <div className="flex items-center gap-2">
-              <Switch checked={itemForm.active} onCheckedChange={(checked) => setItemForm(prev => ({ ...prev, active: checked }))} />
-              <Label>Active</Label>
+              <div className="flex items-center gap-2">
+                <Switch checked={itemForm.active} onCheckedChange={(checked) => setItemForm(prev => ({ ...prev, active: checked }))} />
+                <Label>Active</Label>
             </div>
             
             <div className="flex gap-2 justify-end">
